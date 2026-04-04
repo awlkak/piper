@@ -1,0 +1,85 @@
+return {
+  version = 1,
+  bpm = 120,
+  speed = 6,
+  loop_start = 0,
+  loop_end = nil,
+  machines = {
+    {
+      id = "sine1",
+      plugin = "plugins/generators/sine_osc.lua",
+      params = { freq = 440, amp = 0.5, pan = 0, tune = 0 },
+      x = 100,
+      y = 80,
+    },
+    {
+      id = "bass1",
+      plugin = "plugins/generators/square_osc.lua",
+      params = { freq = 110, amp = 0.3, pan = 0, duty = 0.5 },
+      x = 100,
+      y = 220,
+    },
+    {
+      id = "filter1",
+      plugin = "plugins/effects/lowpass.lua",
+      params = { cutoff = 3000, res = 0.7 },
+      x = 320,
+      y = 80,
+    },
+    {
+      id = "delay1",
+      plugin = "plugins/effects/delay.lua",
+      params = { time = 375, feedback = 0.35, wet = 0.3 },
+      x = 320,
+      y = 220,
+    },
+  },
+  connections = {
+    { from_id = "sine1",   from_pin = "out", to_id = "filter1",        to_pin = "in" },
+    { from_id = "filter1", from_pin = "out", to_id = "__master__",     to_pin = "in" },
+    { from_id = "bass1",   from_pin = "out", to_id = "delay1",         to_pin = "in" },
+    { from_id = "delay1",  from_pin = "out", to_id = "__master__",     to_pin = "in" },
+  },
+  patterns = {
+    pat1 = {
+      id       = "pat1",
+      rows     = 32,
+      channels = 4,
+      label    = "Intro",
+      data = {
+        -- ch0: melody (sine1)   note, inst, vol, fx1c, fx1v, fx2c, fx2v
+        ["1"]  = { note=60, vol=220 },   -- row 0  C4
+        ["5"]  = { note=62, vol=200 },   -- row 4  D4
+        ["9"]  = { note=64, vol=210 },   -- row 8  E4
+        ["13"] = { note=67, vol=220 },   -- row 12 G4
+        ["17"] = { note=69, vol=215 },   -- row 16 A4
+        ["21"] = { note=67, vol=200 },   -- row 20 G4
+        ["25"] = { note=64, vol=205 },   -- row 24 E4
+        ["29"] = { note=62, vol=200 },   -- row 28 D4
+        -- ch1: bass (bass1)
+        ["2"]  = { note=48, vol=200 },   -- row 0  C3
+        ["18"] = { note=43, vol=190 },   -- row 16 G2
+      },
+    },
+    pat2 = {
+      id       = "pat2",
+      rows     = 16,
+      channels = 4,
+      label    = "Bridge",
+      data = {
+        ["1"]  = { note=65, vol=220 },   -- F4
+        ["5"]  = { note=64, vol=210 },   -- E4
+        ["9"]  = { note=62, vol=215 },   -- D4
+        ["13"] = { note=60, vol=220 },   -- C4
+        ["2"]  = { note=53, vol=190 },   -- F2
+        ["10"] = { note=50, vol=185 },   -- D2
+      },
+    },
+  },
+  order = {
+    { pattern_id = "pat1", machine_map = { ["0"] = "sine1", ["1"] = "bass1" } },
+    { pattern_id = "pat1", machine_map = { ["0"] = "sine1", ["1"] = "bass1" } },
+    { pattern_id = "pat2", machine_map = { ["0"] = "sine1", ["1"] = "bass1" } },
+    { pattern_id = "pat1", machine_map = { ["0"] = "sine1", ["1"] = "bass1" } },
+  },
+}
