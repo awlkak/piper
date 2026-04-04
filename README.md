@@ -15,3 +15,5 @@ Drag the folder to a running love2d instance, or else just:
 cd piper
 love .
 ```
+
+by [atomly](www.atomly.com)
