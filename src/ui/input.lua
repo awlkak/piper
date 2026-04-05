@@ -47,10 +47,10 @@ end
 -- Internal handlers (called from main.lua / App)
 -- -------------------------
 
-function Input._mousepressed(x, y, button, istouch)
+function Input._mousepressed(x, y, button, istouch, presses)
     if istouch then return end  -- handled by touch callbacks
     pointers[1] = { x=x, y=y, down=true, dx=0, dy=0, id=1 }
-    push_event({ type="pointer_down", id=1, x=x, y=y, button=button })
+    push_event({ type="pointer_down", id=1, x=x, y=y, button=button, presses=presses or 1 })
 end
 
 function Input._mousereleased(x, y, button, istouch)

@@ -660,8 +660,10 @@ function UI.handle_events()
             elseif active_tab == 3 then views.arranger:handle_event(ev, layout.arranger)
             end
         else
-            -- Desktop: all views always active
-            if not views.graph:handle_event(ev, layout.graph) then
+            -- Desktop: arranger modal (mach_pick) gets priority over all other views
+            if views.arranger.mach_pick then
+                views.arranger:handle_event(ev, layout.arranger)
+            elseif not views.graph:handle_event(ev, layout.graph) then
                 if not views.pattern:handle_event(ev, layout.pattern) then
                     views.arranger:handle_event(ev, layout.arranger)
                 end

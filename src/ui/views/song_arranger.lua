@@ -490,6 +490,12 @@ function SongArranger:_draw_ctx()
     end
 end
 
+local MP_W      = 220
+local MP_H      = 320
+local MP_HDR_H  = 28
+local MP_ROW_H  = 20
+local MP_SB_W   = 10
+
 function SongArranger:_open_mach_pick(slot_i, ch, sx, sy)
     local items = { { label = "(none)", id = "__none__" } }
     local all = Registry.all()
@@ -498,39 +504,75 @@ function SongArranger:_open_mach_pick(slot_i, ch, sx, sy)
     table.sort(ids)
     for _, id in ipairs(ids) do
         local e = all[id]
-        local name = (e.def and e.def.name) and (e.def.name .. "  [" .. id .. "]") or id
-        table.insert(items, { label = name, id = id })
+        local display = (e.def and e.def.name) and (e.def.name .. "  [" .. id .. "]") or id
+        table.insert(items, { label = display, id = id })
     end
-    -- Clamp position so menu stays on screen
+    -- Center the panel on screen
     local sw, sh = love.graphics.getDimensions()
-    local mw, row_h = 180, 22
-    local mh = #items * row_h + 4
-    local mx = math.min(sx, sw - mw - 4)
-    local my = math.min(sy, sh - mh - 4)
-    self.mach_pick = { slot_i = slot_i, ch = ch, x = mx, y = my, items = items }
+    local mx = math.floor((sw - MP_W) / 2)
+    local my = math.floor((sh - MP_H) / 2)
+    self.mach_pick = { slot_i = slot_i, ch = ch, x = mx, y = my,
+                       items = items, scroll = 0 }
 end
 
 function SongArranger:_draw_mach_pick()
-    local mp   = self.mach_pick
-    local mw   = 180
-    local row_h = 22
-    local mh   = #mp.items * row_h + 4
-    local mx, my = love.mouse.getX(), love.mouse.getY()
+    local mp  = self.mach_pick
+    local x, y = mp.x, mp.y
+
+    -- Dim overlay
+    love.graphics.setColor(0, 0, 0, 0.5)
+    local sw, sh = love.graphics.getDimensions()
+    love.graphics.rectangle("fill", 0, 0, sw, sh)
+
+    -- Panel background + border
+    Widgets.rect(x, y, MP_W, MP_H, Theme.bg_panel, Theme.border, 4)
+
     -- Title bar
-    love.graphics.setColor(Theme.bg_header[1], Theme.bg_header[2], Theme.bg_header[3], 1)
-    love.graphics.rectangle("fill", mp.x, mp.y - 18, mw, 18, 4, 4)
-    love.graphics.setColor(Theme.text_dim[1], Theme.text_dim[2], Theme.text_dim[3], 1)
-    love.graphics.setFont(Theme.font_small)
-    love.graphics.print("Assign ch" .. mp.ch, mp.x + 6, mp.y - 16)
-    Widgets.rect(mp.x, mp.y, mw, mh, Theme.bg_panel, Theme.border, 4)
+    Theme.set(Theme.bg_header)
+    love.graphics.rectangle("fill", x + 1, y + 1, MP_W - 2, MP_HDR_H, 4, 4)
+    Widgets.label("Assign Ch" .. (mp.ch + 1), x, y, MP_W - 28, MP_HDR_H,
+                  Theme.accent, Theme.font_small, "center")
+
+    -- Close button
+    Widgets.button("×", x + MP_W - 24, y + 4, 20, 20, false, false, Theme.font_medium)
+
+    -- Divider
+    Theme.set(Theme.border)
+    love.graphics.line(x, y + MP_HDR_H, x + MP_W, y + MP_HDR_H)
+
+    -- List area
+    local list_y = y + MP_HDR_H
+    local list_h = MP_H - MP_HDR_H
+    local inner_w = MP_W - MP_SB_W - 2
+    local row_h  = MP_ROW_H
+    local mx, my = love.mouse.getX(), love.mouse.getY()
+
+    love.graphics.setScissor(x, list_y, MP_W, list_h)
     for idx, item in ipairs(mp.items) do
-        local iy  = mp.y + 2 + (idx - 1) * row_h
-        local hov = Widgets.hit(mx, my, mp.x, iy, mw, row_h)
-        if hov then
-            Theme.set(Theme.btn_hover)
-            love.graphics.rectangle("fill", mp.x + 1, iy, mw - 2, row_h)
+        local iy = list_y + (idx - 1) * row_h - mp.scroll
+        if iy + row_h >= list_y and iy < list_y + list_h then
+            local is_sel = (mp.selected == idx)
+            local hov    = Widgets.hit(mx, my, x, iy, inner_w, row_h)
+            if is_sel then
+                Theme.set({0.20, 0.22, 0.30, 1})
+                love.graphics.rectangle("fill", x + 2, iy, inner_w - 2, row_h)
+                Theme.set(Theme.border_focus)
+                love.graphics.rectangle("line", x + 2, iy, inner_w - 2, row_h)
+            elseif hov then
+                Theme.set(Theme.btn_hover)
+                love.graphics.rectangle("fill", x + 2, iy, inner_w - 2, row_h)
+            end
+            local c = (item.id == "__none__") and Theme.text_dim or Theme.text
+            Widgets.label("  " .. item.label, x, iy, inner_w, row_h, c, Theme.font_small)
         end
-        Widgets.label(item.label, mp.x + 8, iy, mw - 12, row_h, Theme.text, Theme.font_medium)
+    end
+    love.graphics.setScissor()
+
+    -- Scrollbar
+    local total_h = #mp.items * row_h
+    if total_h > list_h then
+        Widgets.scrollbar(x + MP_W - MP_SB_W - 1, list_y,
+                          MP_SB_W, list_h, mp.scroll, total_h, list_h)
     end
 end
 
@@ -547,25 +589,69 @@ function SongArranger:handle_event(ev, rect)
     -- Machine picker (assign machine to channel)
     if self.mach_pick then
         local mp = self.mach_pick
-        if ev.type == "pointer_down" then
-            local mw, row_h = 180, 22
-            local mh = #mp.items * row_h + 4
-            for idx, item in ipairs(mp.items) do
-                local iy = mp.y + 2 + (idx - 1) * row_h
-                if Widgets.hit(ex, ey, mp.x, iy, mw, row_h) then
-                    local entry = self.song.order[mp.slot_i]
-                    if entry then
-                        if item.id == "__none__" then
-                            entry.machine_map[mp.ch] = nil
-                        else
-                            entry.machine_map[mp.ch] = item.id
-                        end
-                    end
-                    self.mach_pick = nil
-                    return true
+        local list_y  = mp.y + MP_HDR_H
+        local list_h  = MP_H - MP_HDR_H
+        local inner_w = MP_W - MP_SB_W - 2
+
+        local function commit(item)
+            local entry = self.song.order[mp.slot_i]
+            if entry then
+                if item.id == "__none__" then
+                    entry.machine_map[mp.ch] = nil
+                else
+                    entry.machine_map[mp.ch] = item.id
                 end
             end
             self.mach_pick = nil
+        end
+
+        if ev.type == "pointer_down" then
+            -- Close button
+            if Widgets.hit(ex, ey, mp.x + MP_W - 24, mp.y + 4, 20, 20) then
+                self.mach_pick = nil
+                return true
+            end
+            -- Click inside list
+            if Widgets.hit(ex, ey, mp.x, list_y, inner_w, list_h) then
+                local rel_y = ey - list_y + mp.scroll
+                local idx = math.floor(rel_y / MP_ROW_H) + 1
+                local item = mp.items[idx]
+                if item then
+                    local presses = ev.presses or 1
+                    if presses >= 2 then
+                        commit(item)
+                    else
+                        mp.selected = idx
+                    end
+                end
+                return true
+            end
+            -- Click outside panel: dismiss
+            if not Widgets.hit(ex, ey, mp.x, mp.y, MP_W, MP_H) then
+                self.mach_pick = nil
+            end
+        elseif ev.type == "key_down" then
+            if ev.key == "escape" then
+                self.mach_pick = nil
+            elseif ev.key == "return" or ev.key == "kpenter" then
+                local item = mp.selected and mp.items[mp.selected]
+                if item then commit(item) end
+            elseif ev.key == "up" then
+                mp.selected = math.max(1, (mp.selected or 1) - 1)
+                -- scroll to keep selected visible
+                local sel_top = (mp.selected - 1) * MP_ROW_H
+                if sel_top < mp.scroll then mp.scroll = sel_top end
+            elseif ev.key == "down" then
+                mp.selected = math.min(#mp.items, (mp.selected or 0) + 1)
+                local sel_bot = mp.selected * MP_ROW_H
+                if sel_bot > mp.scroll + list_h then
+                    mp.scroll = sel_bot - list_h
+                end
+            end
+        elseif ev.type == "wheel" then
+            local total_h = #mp.items * MP_ROW_H
+            local max_scroll = math.max(0, total_h - list_h)
+            mp.scroll = math.max(0, math.min(max_scroll, mp.scroll - ev.dy * MP_ROW_H * 3))
         end
         return true
     end

@@ -287,7 +287,7 @@ function App.textinput(text)
 end
 
 function App.mousepressed(x, y, button, istouch, presses)
-    Input._mousepressed(x, y, button, istouch)
+    Input._mousepressed(x, y, button, istouch, presses)
     UI.handle_events()
 end
 
