@@ -372,6 +372,7 @@ function SongArranger:_draw_order(r)
 
     local view_x = r.x + CH_LABEL_W
     local view_w = r.w - CH_LABEL_W - SCROLLBAR_H
+    self._last_view_w = view_w
     local hdr_y  = r.y
     local grid_y = r.y + ORDER_HDR_H
     local grid_h = r.h - ORDER_HDR_H - SCROLLBAR_H
@@ -768,12 +769,14 @@ function SongArranger:_handle_toolbar_click(ex, ey, rect)
     x2 = x2 + 10  -- divider
     if Widgets.hit(ex, ey, x2, r2y + 3, 28, bh) then
         if self.selected_slot then self.selected_slot = math.max(1, self.selected_slot - 1) end
+        self:_ensure_slot_visible()
         return
     end; x2 = x2 + 31
     if Widgets.hit(ex, ey, x2, r2y + 3, 28, bh) then
         if self.selected_slot and self.song then
             self.selected_slot = math.min(#self.song.order, self.selected_slot + 1)
         end
+        self:_ensure_slot_visible()
         return
     end
 end
@@ -855,13 +858,29 @@ function SongArranger:_select_pat_offset(delta)
     if pat and self.on_select_pat then self.on_select_pat(id, pat) end
 end
 
+-- Scroll so the selected slot is visible in the given order view width.
+-- view_w is optional; if omitted we use the last stored value.
+function SongArranger:_ensure_slot_visible(view_w)
+    if not self.selected_slot or not self.song then return end
+    view_w = view_w or self._last_view_w or 400
+    local slot_left  = (self.selected_slot - 1) * SLOT_W
+    local slot_right = slot_left + SLOT_W
+    if slot_left < self.scroll_x then
+        self.scroll_x = slot_left
+    elseif slot_right > self.scroll_x + view_w then
+        self.scroll_x = slot_right - view_w
+    end
+end
+
 function SongArranger:_handle_key(key)
     local song = self.song
     if key == "left"   then
         self.selected_slot = self.selected_slot and math.max(1, self.selected_slot - 1)
+        self:_ensure_slot_visible()
         return true
     elseif key == "right" then
         self.selected_slot = self.selected_slot and math.min(#song.order, self.selected_slot + 1)
+        self:_ensure_slot_visible()
         return true
     elseif key == "[" then
         self:_select_pat_offset(-1); return true

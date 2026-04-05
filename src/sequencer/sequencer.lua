@@ -6,7 +6,7 @@
 --   samples_per_tick = SAMPLE_RATE * 60 / ticks_per_minute
 --
 -- The sequencer tracks a fractional sample accumulator.
--- Each time Engine calls queue_drain(sample_offset), the sequencer
+-- Each time Engine calls queue_drain(n_samples), the sequencer
 -- checks whether a tick boundary has been crossed and fires note events.
 --
 -- Note events are delivered to machines via DAG.deliver_message().
@@ -54,8 +54,10 @@ end
 
 function Sequencer.recompute_timing()
     if not song then return end
-    local ticks_per_min = song.bpm * song.speed
-    samples_per_tick = sample_rate * 60.0 / ticks_per_min
+    -- Classic tracker timing: BPM controls tick rate, speed controls ticks per row.
+    -- samples_per_tick = sample_rate * 2.5 / BPM  (matches FT2/ProTracker convention:
+    --   125 BPM -> 882 samples/tick at 44100Hz; speed=6 -> 6 ticks/row)
+    samples_per_tick = sample_rate * 2.5 / song.bpm
 end
 
 function Sequencer.play()

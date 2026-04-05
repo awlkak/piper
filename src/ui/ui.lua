@@ -306,8 +306,10 @@ function UI._draw_transport(r)
     love.graphics.line(x + 3, by, x + 3, by + bh)
     x = x + 10
 
-    -- BPM / Speed
-    Widgets.label(string.format("BPM:%d  SPD:%d", transport.bpm, transport.speed),
+    -- BPM / Speed (read live from song so edits reflect immediately)
+    local disp_bpm   = transport.song and transport.song.bpm   or transport.bpm
+    local disp_speed = transport.song and transport.song.speed or transport.speed
+    Widgets.label(string.format("BPM:%d  SPD:%d", disp_bpm, disp_speed),
                   x, r.y, 100, r.h, Theme.text_dim, Theme.font_small)
     x = x + 104
 
@@ -436,7 +438,7 @@ function UI.handle_events()
                         fp.filename = fp.filename:sub(1, -2)
                     end
                 end
-            elseif ev.type == "text_input" and fp.mode == "save" and fp.typing then
+            elseif ev.type == "text" and fp.mode == "save" and fp.typing then
                 fp.filename = fp.filename .. ev.text
             elseif ev.type == "pointer_down" then
                 local ex, ey = ev.x, ev.y
@@ -557,7 +559,7 @@ function UI.handle_events()
                     transport.jump_str = transport.jump_str:sub(1, -2)
                     goto next_event
                 end
-            elseif ev.type == "text_input" then
+            elseif ev.type == "text" then
                 if ev.text:match("%d") then
                     transport.jump_str = transport.jump_str .. ev.text
                 end

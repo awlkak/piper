@@ -85,7 +85,7 @@ function Engine._render_full_buffer(buf, frames)
 
         -- Fire any events due in this block
         if queue_drain then
-            queue_drain(sample_offset)
+            queue_drain(block_size)
         end
 
         -- Zero the block buffer

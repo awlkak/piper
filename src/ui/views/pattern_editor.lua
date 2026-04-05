@@ -853,7 +853,7 @@ function PatternEditor:handle_event(ev, rect)
     if is_pointer and not Widgets.hit(ex, ey, rect.x, rect.y, rect.w, rect.h) then
         if ev.type == "pointer_down" then
             self.focused = false
-            self.edit_field = nil
+            if self.edit_field then self:_commit_toolbar_field() end
         end
         return false
     end
@@ -881,7 +881,7 @@ function PatternEditor:handle_event(ev, rect)
 
     if ev.type == "pointer_down" and Widgets.hit(ex, ey, rect.x, grid_y, rect.w, grid_h) then
         self.focused = true
-        self.edit_field = nil
+        if self.edit_field then self:_commit_toolbar_field() end
         if pat then
             local cell_h = Theme.cell_h
             local col = self.scroll_col + math.floor((ex - rect.x - ROW_NUM_W) / CELL_W)
