@@ -730,9 +730,17 @@ function PatchGraph:_draw_toolbar(rect)
     Widgets.button(self.browser_open and "×" or "+", bx, by, bw, bh,
                    false, hov, Theme.font_large)
 
+    -- Zoom buttons: − [reset] +
+    local zx = bx + bw + 8
+    Widgets.button("-", zx,      by, bw, bh, false, false, Theme.font_large)
+    local zoom_pct = string.format("%d%%", math.floor(self.zoom * 100 + 0.5))
+    Widgets.button(zoom_pct, zx + bw + 2, by, 44, bh, false, false, Theme.font_small)
+    Widgets.button("+", zx + bw + 2 + 44 + 2, by, bw, bh, false, false, Theme.font_large)
+
     -- Hint text
     local hint = "[A] add   [Del] delete   right-click for options   drag pin→pin to connect"
-    Widgets.label(hint, bx + bw + 8, by, rect.w - bw - 20, bh,
+    local hint_x = zx + bw + 2 + 44 + 2 + bw + 8
+    Widgets.label(hint, hint_x, by, rect.x + rect.w - hint_x - 8, bh,
                   Theme.text_dim, Theme.font_small)
 end
 
@@ -1098,11 +1106,18 @@ function PatchGraph:_do_spawn(plugin_path, wx, wy)
 end
 
 function PatchGraph:_spawn_machine(plugin_path, rect)
-    local cx = rect and (rect.x + rect.w * 0.5) or 400
-    local cy = rect and (rect.y + rect.h * 0.5) or 300
-    local wx, wy = self:s2w(cx, cy)
-    wx = wx + math.random(-20, 20)
-    wy = wy + math.random(-20, 20)
+    local wx, wy
+    if self.spawn_wx then
+        wx, wy = self.spawn_wx, self.spawn_wy
+        self.spawn_wx = nil
+        self.spawn_wy = nil
+    else
+        local cx = rect and (rect.x + rect.w * 0.5) or 400
+        local cy = rect and (rect.y + rect.h * 0.5) or 300
+        wx, wy = self:s2w(cx, cy)
+        wx = wx + math.random(-20, 20)
+        wy = wy + math.random(-20, 20)
+    end
     return self:_do_spawn(plugin_path, wx, wy)
 end
 
@@ -1221,43 +1236,21 @@ function PatchGraph:_open_edge_ctx(edge_idx, sx, sy)
 end
 
 function PatchGraph:_open_bg_ctx(sx, sy, wx, wy)
-    if not self.browser_plugins then
-        self.browser_plugins = Discovery.scan()
-    end
-    local bp = self.browser_plugins
-
-    -- Build "Add Machine" sub-items from discovered plugins
-    local CATS = { "generators", "effects", "control", "abstractions" }
-    local CAT_LABELS = { generators="Generator", effects="Effect",
-                         control="Control", abstractions="Abstraction" }
-    local add_items = {}
-    for _, cat in ipairs(CATS) do
-        local paths = bp[cat] or {}
-        for _, path in ipairs(paths) do
-            local name = Discovery.display_name(path)
-            table.insert(add_items, {
-                label = CAT_LABELS[cat] .. ": " .. name,
+    self.ctx = {
+        x = sx, y = sy,
+        items = {
+            {
+                label = "Add Machine\xe2\x80\xa6",
                 fn = function()
                     self.spawn_wx = wx
                     self.spawn_wy = wy
-                    self:_spawn_machine_at(path, wx, wy)
+                    self.browser_open = true
+                    self.browser_plugins = Discovery.scan()
                 end,
-            })
-        end
-    end
-
-    local items = {}
-    -- Flatten add_items directly into the menu (no sub-menus in this simple UI)
-    for _, item in ipairs(add_items) do
-        table.insert(items, item)
-    end
-    table.insert(items, { label = "Open Machine Browser", fn = function()
-        self.browser_open = true
-        self.browser_plugins = Discovery.scan()
-    end })
-    table.insert(items, { label = "Cancel", fn = function() end })
-
-    self.ctx = { x = sx, y = sy, items = items }
+            },
+            { label = "Cancel", fn = function() end },
+        },
+    }
 end
 
 -- -------------------------
@@ -1709,16 +1702,43 @@ function PatchGraph:handle_event(ev, rect)
         end
     end
 
-    -- Toolbar "+" button
+    -- Toolbar buttons
     if ev.type == "pointer_down" then
         local bw, bh = 28, 22
         local bx = rect.x + 6
         local by = rect.y + rect.h - bh - 4
+        -- "+" add machine
         if Widgets.hit(ex, ey, bx, by, bw, bh) then
             self.browser_open = not self.browser_open
             if self.browser_open then
                 self.browser_plugins = Discovery.scan()
             end
+            return true
+        end
+        -- Zoom buttons
+        local zx = bx + bw + 8
+        local cx = rect.x + rect.w * 0.5
+        local cy = rect.y + rect.h * 0.5
+        local wx0, wy0 = self:s2w(cx, cy)
+        if Widgets.hit(ex, ey, zx, by, bw, bh) then
+            -- zoom out
+            self.zoom = math.max(0.15, self.zoom / 1.25)
+            self.offset_x = cx - wx0 * self.zoom
+            self.offset_y = cy - wy0 * self.zoom
+            return true
+        end
+        if Widgets.hit(ex, ey, zx + bw + 2, by, 44, bh) then
+            -- reset zoom
+            self.zoom = 1.0
+            self.offset_x = cx - wx0 * self.zoom
+            self.offset_y = cy - wy0 * self.zoom
+            return true
+        end
+        if Widgets.hit(ex, ey, zx + bw + 2 + 44 + 2, by, bw, bh) then
+            -- zoom in
+            self.zoom = math.min(4.0, self.zoom * 1.25)
+            self.offset_x = cx - wx0 * self.zoom
+            self.offset_y = cy - wy0 * self.zoom
             return true
         end
     end
