@@ -65,6 +65,7 @@ function SongArranger.new()
         scroll_x       = 0,
         list_scroll    = 0,
         play_pos       = nil,
+        playing        = false,
         focused        = false,
         -- Clipboard
         clipboard_slot = nil,   -- copy of {pattern_id, machine_map}
@@ -80,6 +81,7 @@ function SongArranger.new()
         mach_pick      = nil,   -- { slot_i, ch, x, y, items }
         -- Callbacks
         on_select_pat  = nil,   -- fn(pat_id, pat) -- called when user picks a pattern
+        on_play_from   = nil,   -- fn(slot_i) -- seek+play from this order position
     }, SongArranger)
 end
 
@@ -96,10 +98,28 @@ end
 
 function SongArranger:set_playhead(order_pos)
     self.play_pos = order_pos
+    -- Auto-scroll to keep playhead visible while playing
+    if self.playing and order_pos and self._last_view_w then
+        local slot_left  = (order_pos - 1) * SLOT_W
+        local slot_right = slot_left + SLOT_W
+        if slot_left < self.scroll_x then
+            self.scroll_x = slot_left
+        elseif slot_right > self.scroll_x + self._last_view_w then
+            self.scroll_x = slot_right - self._last_view_w
+        end
+    end
+end
+
+function SongArranger:set_playing(playing)
+    self.playing = playing
 end
 
 function SongArranger:set_on_select(fn)
     self.on_select_pat = fn
+end
+
+function SongArranger:set_on_play_from(fn)
+    self.on_play_from = fn
 end
 
 -- -------------------------
@@ -407,16 +427,33 @@ function SongArranger:_draw_order(r)
         local is_play = (i == self.play_pos)
 
         -- Column header
-        local hdr_bg = is_sel and {0.20, 0.22, 0.30, 1} or Theme.bg_header
+        local hdr_bg = is_play and {0.18, 0.38, 0.18, 1}
+                    or is_sel  and {0.20, 0.22, 0.30, 1}
+                    or Theme.bg_header
         Theme.set(hdr_bg)
         love.graphics.rectangle("fill", sx, hdr_y, SLOT_W, ORDER_HDR_H)
-        local num_c = is_play and Theme.accent or (is_sel and Theme.text or Theme.text_dim)
+        local num_c = is_play and {0.4, 1.0, 0.4, 1}
+                   or is_sel  and Theme.text
+                   or Theme.text_dim
         local pat_lbl = pat and (pat.label ~= "" and pat.label or entry.pattern_id) or "?"
-        Widgets.label(string.format("%02d %s", i, pat_lbl:sub(1,4)),
-            sx + 2, hdr_y, SLOT_W - 4, ORDER_HDR_H, num_c, Theme.font_small)
+        -- Playhead triangle indicator
+        if is_play then
+            love.graphics.setColor(0.4, 1.0, 0.4, 1)
+            local tx = sx + 4
+            local ty = hdr_y + math.floor(ORDER_HDR_H * 0.5)
+            love.graphics.polygon("fill", tx, ty - 4, tx, ty + 4, tx + 6, ty)
+            Widgets.label(string.format("%02d %s", i, pat_lbl:sub(1,4)),
+                sx + 12, hdr_y, SLOT_W - 14, ORDER_HDR_H, num_c, Theme.font_small)
+        else
+            Widgets.label(string.format("%02d %s", i, pat_lbl:sub(1,4)),
+                sx + 2, hdr_y, SLOT_W - 4, ORDER_HDR_H, num_c, Theme.font_small)
+        end
 
-        if is_sel then
+        if is_sel and not is_play then
             Theme.set(Theme.border_focus)
+            love.graphics.rectangle("line", sx, hdr_y, SLOT_W, ORDER_HDR_H)
+        elseif is_play then
+            love.graphics.setColor(0.4, 1.0, 0.4, 0.8)
             love.graphics.rectangle("line", sx, hdr_y, SLOT_W, ORDER_HDR_H)
         end
 
@@ -441,10 +478,12 @@ function SongArranger:_draw_order(r)
             end
         end
 
-        -- Playhead highlight
+        -- Playhead column tint
         if is_play then
-            Theme.set({1, 1, 0, 0.15})
+            love.graphics.setColor(0.3, 1.0, 0.3, 0.08)
             love.graphics.rectangle("fill", sx, grid_y, SLOT_W, n_ch * SLOT_H)
+            love.graphics.setColor(0.4, 1.0, 0.4, 0.35)
+            love.graphics.rectangle("line", sx, grid_y, SLOT_W, n_ch * SLOT_H)
         end
 
         -- Drag indicator
@@ -771,6 +810,10 @@ function SongArranger:handle_event(ev, rect)
                 -- Left click on header row or channel cell
                 local cell_area_h = rect.h - TOOLBAR_H - ORDER_HDR_H - SCROLLBAR_H
                 if Widgets.hit(ex, ey, view_x, top, view_w, ORDER_HDR_H) then
+                    -- Double-click header: play from this slot
+                    if (ev.presses or 1) >= 2 then
+                        self:_play_from(i)
+                    end
                     -- Slot header click: load that slot's existing pattern into editor
                     local entry = song.order[i]
                     if entry then
@@ -888,11 +931,18 @@ function SongArranger:_open_pat_ctx(id, sx, sy)
     }
 end
 
+function SongArranger:_play_from(slot_i)
+    if self.on_play_from then self.on_play_from(slot_i) end
+end
+
 function SongArranger:_open_slot_ctx(i, sx, sy)
     local song = self.song
     self.ctx = {
         x = sx, y = sy,
         items = {
+            { label = "▶  Play from here", fn = function()
+                self:_play_from(i)
+            end },
             { label = "Assign selected pattern", fn = function()
                 local entry = song.order[i]
                 if entry and self.selected_pat then
@@ -960,7 +1010,10 @@ end
 
 function SongArranger:_handle_key(key)
     local song = self.song
-    if key == "left"   then
+    if key == "space" then
+        if self.selected_slot then self:_play_from(self.selected_slot) end
+        return true
+    elseif key == "left"   then
         self.selected_slot = self.selected_slot and math.max(1, self.selected_slot - 1)
         self:_ensure_slot_visible()
         return true

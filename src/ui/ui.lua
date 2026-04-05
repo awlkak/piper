@@ -135,10 +135,19 @@ function UI.set_song(song)
     views.arranger:set_on_select(function(id, pat, order_pos)
         views.pattern:set_pattern(pat, song, order_pos or 1)
     end)
+    views.arranger:set_on_play_from(function(slot_i)
+        if on_seek then on_seek(slot_i) end
+        if not transport.playing then
+            if on_play then on_play() end
+            transport.playing = true
+            views.arranger:set_playing(true)
+        end
+    end)
 end
 
 function UI.set_playing(playing)
     transport.playing = playing
+    views.arranger:set_playing(playing)
 end
 
 function UI.set_playhead(order_pos, row)
