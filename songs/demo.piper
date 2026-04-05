@@ -1,85 +1,2760 @@
 return {
-  version = 1,
-  bpm = 120,
-  speed = 6,
+  bpm = 150,
+  connections = {
+    {
+      from_id = "kick",
+      from_pin = "out",
+      to_id = "kick_shape",
+      to_pin = "in"
+    },
+    {
+      from_id = "kick_shape",
+      from_pin = "out",
+      to_id = "drum_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "snare",
+      from_pin = "out",
+      to_id = "drum_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "breaks",
+      from_pin = "out",
+      to_id = "drum_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "drum_comp",
+      from_pin = "out",
+      to_id = "master_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "acid_osc",
+      from_pin = "out",
+      to_id = "acid_filter",
+      to_pin = "in"
+    },
+    {
+      from_id = "acid_lfo",
+      from_pin = "out",
+      to_id = "acid_filter",
+      to_pin = "cutoff"
+    },
+    {
+      from_id = "acid_filter",
+      from_pin = "out",
+      to_id = "acid_sat",
+      to_pin = "in"
+    },
+    {
+      from_id = "acid_sat",
+      from_pin = "out",
+      to_id = "acid_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "acid_comp",
+      from_pin = "out",
+      to_id = "master_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "wobble_osc",
+      from_pin = "out",
+      to_id = "wobble_fold",
+      to_pin = "in"
+    },
+    {
+      from_id = "wobble_fold",
+      from_pin = "out",
+      to_id = "wobble_filter",
+      to_pin = "in"
+    },
+    {
+      from_id = "wobble_lfo",
+      from_pin = "out",
+      to_id = "wobble_filter",
+      to_pin = "cutoff"
+    },
+    {
+      from_id = "wobble_filter",
+      from_pin = "out",
+      to_id = "master_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "fm_stab",
+      from_pin = "out",
+      to_id = "stab_crush",
+      to_pin = "in"
+    },
+    {
+      from_id = "stab_crush",
+      from_pin = "out",
+      to_id = "stab_delay",
+      to_pin = "in"
+    },
+    {
+      from_id = "stab_delay",
+      from_pin = "out",
+      to_id = "master_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "rand_lfo",
+      from_pin = "out",
+      to_id = "fm_stab",
+      to_pin = "index"
+    },
+    {
+      from_id = "supersaw",
+      from_pin = "out",
+      to_id = "saw_filter",
+      to_pin = "in"
+    },
+    {
+      from_id = "saw_filter",
+      from_pin = "out",
+      to_id = "saw_chorus",
+      to_pin = "in"
+    },
+    {
+      from_id = "saw_chorus",
+      from_pin = "out",
+      to_id = "saw_reverb",
+      to_pin = "in"
+    },
+    {
+      from_id = "saw_reverb",
+      from_pin = "out",
+      to_id = "master_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "arp_seq",
+      from_pin = "trig",
+      to_id = "pluck",
+      to_pin = "trig"
+    },
+    {
+      from_id = "pluck",
+      from_pin = "out",
+      to_id = "pluck_delay",
+      to_pin = "in"
+    },
+    {
+      from_id = "pluck_delay",
+      from_pin = "out",
+      to_id = "master_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "chaos",
+      from_pin = "out",
+      to_id = "ring_mod",
+      to_pin = "in"
+    },
+    {
+      from_id = "chaos",
+      from_pin = "out",
+      to_id = "ring_mod",
+      to_pin = "carrier"
+    },
+    {
+      from_id = "ring_mod",
+      from_pin = "out",
+      to_id = "shimmer",
+      to_pin = "in"
+    },
+    {
+      from_id = "shimmer",
+      from_pin = "out",
+      to_id = "master_comp",
+      to_pin = "in"
+    },
+    {
+      from_id = "master_comp",
+      from_pin = "out",
+      to_id = "master_limit",
+      to_pin = "in"
+    },
+    {
+      from_id = "master_limit",
+      from_pin = "out",
+      to_id = "master_wide",
+      to_pin = "in"
+    },
+    {
+      from_id = "master_wide",
+      from_pin = "out",
+      to_id = "__master__",
+      to_pin = "in"
+    }
+  },
   loop_start = 0,
-  loop_end = nil,
   machines = {
     {
-      id = "sine1",
-      plugin = "plugins/generators/sine_osc.lua",
-      params = { freq = 440, amp = 0.5, pan = 0, tune = 0 },
-      x = 100,
-      y = 80,
-    },
-    {
-      id = "bass1",
-      plugin = "plugins/generators/square_osc.lua",
-      params = { freq = 110, amp = 0.3, pan = 0, duty = 0.5 },
-      x = 100,
-      y = 220,
-    },
-    {
-      id = "filter1",
-      plugin = "plugins/effects/lowpass.lua",
-      params = { cutoff = 3000, res = 0.7 },
-      x = 320,
-      y = 80,
-    },
-    {
-      id = "delay1",
-      plugin = "plugins/effects/delay.lua",
-      params = { time = 375, feedback = 0.35, wet = 0.3 },
-      x = 320,
-      y = 220,
-    },
-  },
-  connections = {
-    { from_id = "sine1",   from_pin = "out", to_id = "filter1",        to_pin = "in" },
-    { from_id = "filter1", from_pin = "out", to_id = "__master__",     to_pin = "in" },
-    { from_id = "bass1",   from_pin = "out", to_id = "delay1",         to_pin = "in" },
-    { from_id = "delay1",  from_pin = "out", to_id = "__master__",     to_pin = "in" },
-  },
-  patterns = {
-    pat1 = {
-      id       = "pat1",
-      rows     = 32,
-      channels = 4,
-      label    = "Intro",
-      data = {
-        -- ch0: melody (sine1)   note, inst, vol, fx1c, fx1v, fx2c, fx2v
-        ["1"]  = { note=60, vol=220 },   -- row 0  C4
-        ["5"]  = { note=62, vol=200 },   -- row 4  D4
-        ["9"]  = { note=64, vol=210 },   -- row 8  E4
-        ["13"] = { note=67, vol=220 },   -- row 12 G4
-        ["17"] = { note=69, vol=215 },   -- row 16 A4
-        ["21"] = { note=67, vol=200 },   -- row 20 G4
-        ["25"] = { note=64, vol=205 },   -- row 24 E4
-        ["29"] = { note=62, vol=200 },   -- row 28 D4
-        -- ch1: bass (bass1)
-        ["2"]  = { note=48, vol=200 },   -- row 0  C3
-        ["18"] = { note=43, vol=190 },   -- row 16 G2
+      id = "pluck",
+      params = {
+        amp = 0.55,
+        brightness = 0.6,
+        decay = 0.7,
+        pan = -0.3
       },
+      plugin = "plugins/generators/karplus_strong.lua",
+      x = 200,
+      y = 1280
     },
-    pat2 = {
-      id       = "pat2",
-      rows     = 16,
-      channels = 4,
-      label    = "Bridge",
-      data = {
-        ["1"]  = { note=65, vol=220 },   -- F4
-        ["5"]  = { note=64, vol=210 },   -- E4
-        ["9"]  = { note=62, vol=215 },   -- D4
-        ["13"] = { note=60, vol=220 },   -- C4
-        ["2"]  = { note=53, vol=190 },   -- F2
-        ["10"] = { note=50, vol=185 },   -- D2
+    {
+      id = "acid_sat",
+      params = {
+        drive = 0.55,
+        mix = 0.8,
+        tone = 0.6
       },
+      plugin = "plugins/effects/tape_saturation.lua",
+      x = 360,
+      y = 460
     },
+    {
+      id = "acid_comp",
+      params = {
+        attack = 0.001,
+        makeup = 3,
+        ratio = 3,
+        release = 0.05,
+        threshold = -8
+      },
+      plugin = "plugins/effects/compressor.lua",
+      x = 520,
+      y = 460
+    },
+    {
+      id = "acid_lfo",
+      params = {
+        depth = 1,
+        offset = 0,
+        rate = 2,
+        shape = 0
+      },
+      plugin = "plugins/control/lfo.lua",
+      x = 40,
+      y = 580
+    },
+    {
+      id = "clk_div",
+      params = {
+        divisor = 4
+      },
+      plugin = "plugins/control/clock_divider.lua",
+      x = 40,
+      y = 1400
+    },
+    {
+      id = "wobble_fold",
+      params = {
+        drive = 2.2,
+        mix = 0.7
+      },
+      plugin = "plugins/effects/wavefolder.lua",
+      x = 200,
+      y = 720
+    },
+    {
+      id = "chaos",
+      params = {
+        amp = 0.25,
+        chaos = 0.72,
+        freq = 110,
+        mode = 1,
+        pan = 0.4
+      },
+      plugin = "plugins/generators/chaos_osc.lua",
+      x = 40,
+      y = 1520
+    },
+    {
+      id = "wobble_filter",
+      params = {
+        cutoff = 300,
+        mode = 0,
+        resonance = 0.75
+      },
+      plugin = "plugins/effects/multimode_filter.lua",
+      x = 360,
+      y = 720
+    },
+    {
+      id = "ring_mod",
+      params = {
+        depth = 0.8,
+        freq = 137,
+        mix = 0.5
+      },
+      plugin = "plugins/effects/ring_modulator.lua",
+      x = 200,
+      y = 1520
+    },
+    {
+      id = "wobble_lfo",
+      params = {
+        depth = 1,
+        offset = 0,
+        rate = 0.5,
+        shape = 2
+      },
+      plugin = "plugins/control/lfo.lua",
+      x = 40,
+      y = 840
+    },
+    {
+      id = "shimmer",
+      params = {
+        damp = 0.4,
+        pitch_shift = 12,
+        shimmer = 0.55,
+        size = 0.8,
+        wet = 0.45
+      },
+      plugin = "plugins/effects/shimmer_reverb.lua",
+      x = 360,
+      y = 1520
+    },
+    {
+      id = "stab_crush",
+      params = {
+        bits = 6,
+        mix = 0.6,
+        rate = 0.5
+      },
+      plugin = "plugins/effects/bitcrusher.lua",
+      x = 200,
+      y = 980
+    },
+    {
+      id = "rand_lfo",
+      params = {
+        depth = 1,
+        rate = 3.5,
+        smooth = 0.7
+      },
+      plugin = "plugins/control/random_lfo.lua",
+      x = 520,
+      y = 980
+    },
+    {
+      id = "stab_delay",
+      params = {
+        feedback = 0.38,
+        spread = 0.8,
+        time_l = 125,
+        time_r = 187,
+        wet = 0.35
+      },
+      plugin = "plugins/effects/pingpong_delay.lua",
+      x = 360,
+      y = 980
+    },
+    {
+      id = "master_comp",
+      params = {
+        attack = 0.003,
+        makeup = 2,
+        ratio = 2.5,
+        release = 0.15,
+        threshold = -6
+      },
+      plugin = "plugins/effects/compressor.lua",
+      x = 700,
+      y = 400
+    },
+    {
+      id = "master_limit",
+      params = {
+        release = 0.05,
+        threshold = -1
+      },
+      plugin = "plugins/effects/limiter.lua",
+      x = 860,
+      y = 400
+    },
+    {
+      id = "master_wide",
+      params = {
+        width = 0.6
+      },
+      plugin = "plugins/effects/stereo_widener.lua",
+      x = 1020,
+      y = 400
+    },
+    {
+      id = "supersaw",
+      params = {
+        amp = 0.4,
+        attack = 0.02,
+        decay = 0.3,
+        detune = 22,
+        freq = 440,
+        mix = 0.5,
+        pan = 0,
+        release = 0.4,
+        spread = 0.9,
+        sustain = 0.5,
+        tune = 0
+      },
+      plugin = "plugins/generators/supersaw_osc.lua",
+      x = 40,
+      y = 1120
+    },
+    {
+      id = "saw_filter",
+      params = {
+        cutoff = 2800,
+        mode = 0,
+        resonance = 0.45
+      },
+      plugin = "plugins/effects/multimode_filter.lua",
+      x = 200,
+      y = 1120
+    },
+    {
+      id = "saw_chorus",
+      params = {
+        depth = 0.012,
+        mix = 0.45,
+        rate = 0.4,
+        voices = 3
+      },
+      plugin = "plugins/effects/chorus.lua",
+      x = 360,
+      y = 1120
+    },
+    {
+      id = "saw_reverb",
+      params = {
+        damp = 0.5,
+        pre_delay = 0.02,
+        size = 0.55,
+        wet = 0.28
+      },
+      plugin = "plugins/effects/diffusion_reverb.lua",
+      x = 520,
+      y = 1120
+    },
+    {
+      id = "arp_seq",
+      params = {
+        direction = 0,
+        g1 = 1,
+        g2 = 1,
+        g3 = 1,
+        g4 = 1,
+        g5 = 1,
+        g6 = 0,
+        g7 = 1,
+        g8 = 1,
+        gate_len = 0.4,
+        n1 = 60,
+        n2 = 64,
+        n3 = 67,
+        n4 = 72,
+        n5 = 67,
+        n6 = 64,
+        n7 = 62,
+        n8 = 60,
+        steps = 8,
+        v1 = 0.9,
+        v2 = 0.75,
+        v3 = 0.85,
+        v4 = 1,
+        v5 = 0.8,
+        v6 = 0.7,
+        v7 = 0.75,
+        v8 = 0.8
+      },
+      plugin = "plugins/control/step_sequencer.lua",
+      x = 40,
+      y = 1280
+    },
+    {
+      id = "kick",
+      params = {
+        amp = 0.9,
+        decay = 0.45,
+        pan = 0,
+        punch = 0.8,
+        tune = 0
+      },
+      plugin = "plugins/generators/bass_drum_808.lua",
+      x = 40,
+      y = 40
+    },
+    {
+      id = "snare",
+      params = {
+        amp = 0.75,
+        decay = 0.18,
+        pan = 0,
+        snap = 0.6,
+        tone = 0.4,
+        tune = 0
+      },
+      plugin = "plugins/generators/analog_snare.lua",
+      x = 40,
+      y = 160
+    },
+    {
+      id = "breaks",
+      params = {
+        amp = 0.6,
+        pan = 0
+      },
+      plugin = "plugins/generators/drum_machine.lua",
+      x = 40,
+      y = 280
+    },
+    {
+      id = "kick_shape",
+      params = {
+        attack = 0.8,
+        gain = 1,
+        sustain = -0.3
+      },
+      plugin = "plugins/effects/transient_shaper.lua",
+      x = 200,
+      y = 40
+    },
+    {
+      id = "drum_comp",
+      params = {
+        attack = 0.002,
+        makeup = 4,
+        ratio = 4,
+        release = 0.08,
+        threshold = -12
+      },
+      plugin = "plugins/effects/compressor.lua",
+      x = 360,
+      y = 160
+    },
+    {
+      id = "pluck_delay",
+      params = {
+        feedback = 0.42,
+        flutter = 0.002,
+        time = 87,
+        tone = 0.65,
+        wet = 0.38,
+        wow = 0.003
+      },
+      plugin = "plugins/effects/tape_delay.lua",
+      x = 360,
+      y = 1280
+    },
+    {
+      id = "wobble_osc",
+      params = {
+        amp = 0.85,
+        duty = 0.3,
+        freq = 55,
+        pan = 0,
+        tune = 0
+      },
+      plugin = "plugins/generators/pulse_osc.lua",
+      x = 40,
+      y = 720
+    },
+    {
+      id = "acid_osc",
+      params = {
+        amp = 0.8,
+        freq = 55,
+        pan = 0,
+        tune = 0
+      },
+      plugin = "plugins/generators/sawtooth_osc.lua",
+      x = 40,
+      y = 460
+    },
+    {
+      id = "fm_stab",
+      params = {
+        amp = 0.5,
+        attack = 0.005,
+        decay = 0.12,
+        freq = 440,
+        index = 3.5,
+        pan = 0.2,
+        ratio = 2,
+        release = 0.15,
+        sustain = 0.1
+      },
+      plugin = "plugins/generators/fm_synth.lua",
+      x = 40,
+      y = 980
+    },
+    {
+      id = "acid_filter",
+      params = {
+        cutoff = 400,
+        drive = 0.5,
+        resonance = 0.82
+      },
+      plugin = "plugins/effects/ladder_filter.lua",
+      x = 200,
+      y = 460
+    }
   },
   order = {
-    { pattern_id = "pat1", machine_map = { ["0"] = "sine1", ["1"] = "bass1" } },
-    { pattern_id = "pat1", machine_map = { ["0"] = "sine1", ["1"] = "bass1" } },
-    { pattern_id = "pat2", machine_map = { ["0"] = "sine1", ["1"] = "bass1" } },
-    { pattern_id = "pat1", machine_map = { ["0"] = "sine1", ["1"] = "bass1" } },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "intro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "intro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "intro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "intro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "intro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "intro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "intro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "intro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "break_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "saw_riff"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "idm_break"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "acid_main"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "wobble_drop"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "outro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "outro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "outro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "outro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "outro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "outro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "outro"
+    },
+    {
+      machine_map = {
+        ["0"] = "kick",
+        ["1"] = "snare",
+        ["2"] = "breaks",
+        ["3"] = "acid_osc",
+        ["4"] = "wobble_osc",
+        ["5"] = "fm_stab",
+        ["6"] = "supersaw",
+        ["7"] = "pluck"
+      },
+      pattern_id = "outro"
+    }
   },
+  patterns = {
+    acid_main = {
+      auto = {},
+      channels = 8,
+      data = {
+        ["1"] = {
+          note = 36,
+          vol = 230
+        },
+        ["100"] = {
+          note = 45,
+          vol = 210
+        },
+        ["103"] = {
+          note = 58,
+          vol = 140
+        },
+        ["115"] = {
+          note = 42,
+          vol = 130
+        },
+        ["116"] = {
+          note = 40,
+          vol = 195
+        },
+        ["19"] = {
+          note = 42,
+          vol = 160
+        },
+        ["20"] = {
+          note = 43,
+          vol = 195
+        },
+        ["33"] = {
+          note = 36,
+          vol = 200
+        },
+        ["34"] = {
+          note = 38,
+          vol = 190
+        },
+        ["36"] = {
+          note = 45,
+          vol = 220
+        },
+        ["39"] = {
+          note = 63,
+          vol = 145
+        },
+        ["4"] = {
+          note = 40,
+          vol = 210
+        },
+        ["5"] = {
+          note = 28,
+          vol = 200
+        },
+        ["51"] = {
+          note = 42,
+          vol = 140
+        },
+        ["52"] = {
+          note = 44,
+          vol = 205
+        },
+        ["65"] = {
+          note = 36,
+          vol = 225
+        },
+        ["68"] = {
+          note = 43,
+          vol = 215
+        },
+        ["69"] = {
+          note = 31,
+          vol = 195
+        },
+        ["7"] = {
+          note = 60,
+          vol = 150
+        },
+        ["71"] = {
+          note = 60,
+          vol = 150
+        },
+        ["83"] = {
+          note = 42,
+          vol = 155
+        },
+        ["84"] = {
+          note = 42,
+          vol = 200
+        },
+        ["97"] = {
+          note = 36,
+          vol = 205
+        },
+        ["98"] = {
+          note = 38,
+          vol = 195
+        }
+      },
+      id = "acid_main",
+      label = "Acid Main",
+      rows = 16
+    },
+    break_drop = {
+      auto = {},
+      channels = 8,
+      data = {
+        ["1"] = {
+          note = 36,
+          vol = 230
+        },
+        ["100"] = {
+          note = 40,
+          vol = 220
+        },
+        ["102"] = {
+          note = 52,
+          vol = 160
+        },
+        ["115"] = {
+          note = 42,
+          vol = 150
+        },
+        ["129"] = {
+          note = 36,
+          vol = 230
+        },
+        ["133"] = {
+          note = 28,
+          vol = 200
+        },
+        ["147"] = {
+          note = 42,
+          vol = 170
+        },
+        ["152"] = {
+          note = 67,
+          vol = 140
+        },
+        ["155"] = {
+          note = 42,
+          vol = 145
+        },
+        ["161"] = {
+          note = 36,
+          vol = 185
+        },
+        ["164"] = {
+          note = 38,
+          vol = 215
+        },
+        ["166"] = {
+          note = 57,
+          vol = 165
+        },
+        ["179"] = {
+          note = 42,
+          vol = 160
+        },
+        ["187"] = {
+          note = 42,
+          vol = 155
+        },
+        ["19"] = {
+          note = 42,
+          vol = 170
+        },
+        ["194"] = {
+          note = 38,
+          vol = 205
+        },
+        ["197"] = {
+          note = 33,
+          vol = 195
+        },
+        ["209"] = {
+          note = 36,
+          vol = 215
+        },
+        ["216"] = {
+          note = 60,
+          vol = 135
+        },
+        ["227"] = {
+          note = 42,
+          vol = 165
+        },
+        ["228"] = {
+          note = 36,
+          vol = 210
+        },
+        ["230"] = {
+          note = 55,
+          vol = 155
+        },
+        ["24"] = {
+          note = 60,
+          vol = 140
+        },
+        ["243"] = {
+          note = 42,
+          vol = 150
+        },
+        ["27"] = {
+          note = 42,
+          vol = 145
+        },
+        ["33"] = {
+          note = 36,
+          vol = 190
+        },
+        ["36"] = {
+          note = 43,
+          vol = 205
+        },
+        ["38"] = {
+          note = 55,
+          vol = 170
+        },
+        ["4"] = {
+          note = 36,
+          vol = 215
+        },
+        ["5"] = {
+          note = 28,
+          vol = 200
+        },
+        ["51"] = {
+          note = 42,
+          vol = 160
+        },
+        ["59"] = {
+          note = 42,
+          vol = 140
+        },
+        ["66"] = {
+          note = 38,
+          vol = 200
+        },
+        ["69"] = {
+          note = 31,
+          vol = 190
+        },
+        ["81"] = {
+          note = 36,
+          vol = 210
+        },
+        ["88"] = {
+          note = 64,
+          vol = 135
+        },
+        ["99"] = {
+          note = 42,
+          vol = 165
+        }
+      },
+      id = "break_drop",
+      label = "Break Drop",
+      rows = 32
+    },
+    idm_break = {
+      auto = {},
+      channels = 8,
+      data = {
+        ["1"] = {
+          note = 36,
+          vol = 230
+        },
+        ["102"] = {
+          note = 52,
+          vol = 155
+        },
+        ["107"] = {
+          note = 42,
+          vol = 150
+        },
+        ["11"] = {
+          note = 42,
+          vol = 145
+        },
+        ["116"] = {
+          note = 38,
+          vol = 195
+        },
+        ["123"] = {
+          note = 42,
+          vol = 135
+        },
+        ["136"] = {
+          note = 48,
+          vol = 115
+        },
+        ["137"] = {
+          note = 36,
+          vol = 165
+        },
+        ["140"] = {
+          note = 43,
+          vol = 210
+        },
+        ["147"] = {
+          note = 42,
+          vol = 160
+        },
+        ["155"] = {
+          note = 42,
+          vol = 145
+        },
+        ["161"] = {
+          note = 36,
+          vol = 215
+        },
+        ["164"] = {
+          note = 36,
+          vol = 200
+        },
+        ["166"] = {
+          note = 50,
+          vol = 160
+        },
+        ["17"] = {
+          note = 36,
+          vol = 160
+        },
+        ["171"] = {
+          note = 42,
+          vol = 165
+        },
+        ["179"] = {
+          note = 42,
+          vol = 140
+        },
+        ["185"] = {
+          note = 36,
+          vol = 180
+        },
+        ["194"] = {
+          note = 38,
+          vol = 195
+        },
+        ["202"] = {
+          note = 38,
+          vol = 160
+        },
+        ["211"] = {
+          note = 42,
+          vol = 155
+        },
+        ["217"] = {
+          note = 36,
+          vol = 210
+        },
+        ["227"] = {
+          note = 42,
+          vol = 145
+        },
+        ["230"] = {
+          note = 48,
+          vol = 150
+        },
+        ["235"] = {
+          note = 42,
+          vol = 160
+        },
+        ["241"] = {
+          note = 36,
+          vol = 170
+        },
+        ["251"] = {
+          note = 42,
+          vol = 135
+        },
+        ["27"] = {
+          note = 42,
+          vol = 160
+        },
+        ["28"] = {
+          note = 43,
+          vol = 195
+        },
+        ["35"] = {
+          note = 42,
+          vol = 130
+        },
+        ["38"] = {
+          note = 48,
+          vol = 165
+        },
+        ["4"] = {
+          note = 36,
+          vol = 210
+        },
+        ["43"] = {
+          note = 42,
+          vol = 155
+        },
+        ["44"] = {
+          note = 45,
+          vol = 210
+        },
+        ["49"] = {
+          note = 36,
+          vol = 210
+        },
+        ["59"] = {
+          note = 42,
+          vol = 165
+        },
+        ["66"] = {
+          note = 38,
+          vol = 200
+        },
+        ["68"] = {
+          note = 42,
+          vol = 200
+        },
+        ["74"] = {
+          note = 38,
+          vol = 155
+        },
+        ["8"] = {
+          note = 36,
+          vol = 120
+        },
+        ["81"] = {
+          note = 36,
+          vol = 175
+        },
+        ["91"] = {
+          note = 42,
+          vol = 140
+        },
+        ["92"] = {
+          note = 40,
+          vol = 205
+        },
+        ["97"] = {
+          note = 36,
+          vol = 220
+        }
+      },
+      id = "idm_break",
+      label = "IDM Break",
+      rows = 32
+    },
+    intro = {
+      auto = {},
+      channels = 8,
+      data = {
+        ["1"] = {
+          note = 36,
+          vol = 220
+        },
+        ["115"] = {
+          note = 42,
+          vol = 125
+        },
+        ["129"] = {
+          note = 36,
+          vol = 220
+        },
+        ["132"] = {
+          note = 43,
+          vol = 200
+        },
+        ["135"] = {
+          note = 63,
+          vol = 125
+        },
+        ["147"] = {
+          note = 42,
+          vol = 145
+        },
+        ["179"] = {
+          note = 42,
+          vol = 130
+        },
+        ["19"] = {
+          note = 42,
+          vol = 145
+        },
+        ["193"] = {
+          note = 36,
+          vol = 215
+        },
+        ["194"] = {
+          note = 38,
+          vol = 185
+        },
+        ["196"] = {
+          note = 41,
+          vol = 195
+        },
+        ["211"] = {
+          note = 42,
+          vol = 140
+        },
+        ["243"] = {
+          note = 42,
+          vol = 125
+        },
+        ["4"] = {
+          note = 36,
+          vol = 200
+        },
+        ["51"] = {
+          note = 42,
+          vol = 130
+        },
+        ["65"] = {
+          note = 36,
+          vol = 210
+        },
+        ["66"] = {
+          note = 38,
+          vol = 180
+        },
+        ["68"] = {
+          note = 36,
+          vol = 190
+        },
+        ["7"] = {
+          note = 60,
+          vol = 120
+        },
+        ["83"] = {
+          note = 42,
+          vol = 140
+        }
+      },
+      id = "intro",
+      label = "Intro",
+      rows = 32
+    },
+    outro = {
+      auto = {},
+      channels = 8,
+      data = {
+        ["1"] = {
+          note = 36,
+          vol = 200
+        },
+        ["129"] = {
+          note = 36,
+          vol = 180
+        },
+        ["132"] = {
+          note = 40,
+          vol = 170
+        },
+        ["136"] = {
+          note = 48,
+          vol = 120
+        },
+        ["193"] = {
+          note = 36,
+          vol = 165
+        },
+        ["194"] = {
+          note = 38,
+          vol = 155
+        },
+        ["196"] = {
+          note = 38,
+          vol = 160
+        },
+        ["200"] = {
+          note = 48,
+          vol = 110
+        },
+        ["4"] = {
+          note = 36,
+          vol = 185
+        },
+        ["65"] = {
+          note = 36,
+          vol = 190
+        },
+        ["66"] = {
+          note = 38,
+          vol = 170
+        },
+        ["68"] = {
+          note = 43,
+          vol = 175
+        },
+        ["72"] = {
+          note = 48,
+          vol = 105
+        },
+        ["8"] = {
+          note = 48,
+          vol = 90
+        }
+      },
+      id = "outro",
+      label = "Outro",
+      rows = 32
+    },
+    saw_riff = {
+      auto = {},
+      channels = 8,
+      data = {
+        ["1"] = {
+          note = 36,
+          vol = 225
+        },
+        ["103"] = {
+          note = 77,
+          vol = 170
+        },
+        ["112"] = {
+          note = 67,
+          vol = 145
+        },
+        ["115"] = {
+          note = 42,
+          vol = 135
+        },
+        ["129"] = {
+          note = 36,
+          vol = 225
+        },
+        ["132"] = {
+          note = 40,
+          vol = 205
+        },
+        ["133"] = {
+          note = 31,
+          vol = 190
+        },
+        ["134"] = {
+          note = 60,
+          vol = 155
+        },
+        ["135"] = {
+          note = 75,
+          vol = 180
+        },
+        ["144"] = {
+          note = 60,
+          vol = 150
+        },
+        ["147"] = {
+          note = 42,
+          vol = 155
+        },
+        ["16"] = {
+          note = 60,
+          vol = 150
+        },
+        ["160"] = {
+          note = 65,
+          vol = 140
+        },
+        ["161"] = {
+          note = 36,
+          vol = 195
+        },
+        ["167"] = {
+          note = 72,
+          vol = 175
+        },
+        ["176"] = {
+          note = 67,
+          vol = 145
+        },
+        ["179"] = {
+          note = 42,
+          vol = 140
+        },
+        ["19"] = {
+          note = 42,
+          vol = 155
+        },
+        ["193"] = {
+          note = 36,
+          vol = 220
+        },
+        ["194"] = {
+          note = 38,
+          vol = 200
+        },
+        ["196"] = {
+          note = 38,
+          vol = 200
+        },
+        ["198"] = {
+          note = 58,
+          vol = 145
+        },
+        ["199"] = {
+          note = 70,
+          vol = 170
+        },
+        ["208"] = {
+          note = 62,
+          vol = 150
+        },
+        ["211"] = {
+          note = 42,
+          vol = 150
+        },
+        ["224"] = {
+          note = 65,
+          vol = 140
+        },
+        ["225"] = {
+          note = 36,
+          vol = 200
+        },
+        ["23"] = {
+          note = 75,
+          vol = 170
+        },
+        ["231"] = {
+          note = 72,
+          vol = 180
+        },
+        ["240"] = {
+          note = 69,
+          vol = 145
+        },
+        ["243"] = {
+          note = 42,
+          vol = 135
+        },
+        ["32"] = {
+          note = 64,
+          vol = 140
+        },
+        ["33"] = {
+          note = 36,
+          vol = 195
+        },
+        ["39"] = {
+          note = 77,
+          vol = 175
+        },
+        ["4"] = {
+          note = 40,
+          vol = 205
+        },
+        ["48"] = {
+          note = 67,
+          vol = 145
+        },
+        ["5"] = {
+          note = 28,
+          vol = 195
+        },
+        ["51"] = {
+          note = 42,
+          vol = 140
+        },
+        ["6"] = {
+          note = 60,
+          vol = 155
+        },
+        ["65"] = {
+          note = 36,
+          vol = 220
+        },
+        ["66"] = {
+          note = 38,
+          vol = 200
+        },
+        ["68"] = {
+          note = 43,
+          vol = 210
+        },
+        ["7"] = {
+          note = 72,
+          vol = 180
+        },
+        ["70"] = {
+          note = 63,
+          vol = 150
+        },
+        ["71"] = {
+          note = 79,
+          vol = 185
+        },
+        ["80"] = {
+          note = 60,
+          vol = 150
+        },
+        ["83"] = {
+          note = 42,
+          vol = 150
+        },
+        ["96"] = {
+          note = 64,
+          vol = 140
+        },
+        ["97"] = {
+          note = 36,
+          vol = 200
+        }
+      },
+      id = "saw_riff",
+      label = "Saw Riff",
+      rows = 32
+    },
+    wobble_drop = {
+      auto = {},
+      channels = 8,
+      data = {
+        ["1"] = {
+          note = 36,
+          vol = 235
+        },
+        ["101"] = {
+          note = 28,
+          vol = 205
+        },
+        ["115"] = {
+          note = 42,
+          vol = 155
+        },
+        ["118"] = {
+          note = 56,
+          vol = 145
+        },
+        ["19"] = {
+          note = 42,
+          vol = 175
+        },
+        ["22"] = {
+          note = 60,
+          vol = 160
+        },
+        ["34"] = {
+          note = 38,
+          vol = 210
+        },
+        ["37"] = {
+          note = 26,
+          vol = 210
+        },
+        ["4"] = {
+          note = 36,
+          vol = 205
+        },
+        ["5"] = {
+          note = 24,
+          vol = 220
+        },
+        ["51"] = {
+          note = 42,
+          vol = 160
+        },
+        ["54"] = {
+          note = 58,
+          vol = 150
+        },
+        ["65"] = {
+          note = 36,
+          vol = 230
+        },
+        ["68"] = {
+          note = 38,
+          vol = 200
+        },
+        ["69"] = {
+          note = 24,
+          vol = 215
+        },
+        ["7"] = {
+          note = 60,
+          vol = 140
+        },
+        ["71"] = {
+          note = 63,
+          vol = 135
+        },
+        ["83"] = {
+          note = 42,
+          vol = 170
+        },
+        ["86"] = {
+          note = 60,
+          vol = 155
+        },
+        ["98"] = {
+          note = 38,
+          vol = 210
+        }
+      },
+      id = "wobble_drop",
+      label = "Wobble Drop",
+      rows = 16
+    }
+  },
+  speed = 6,
+  version = 1
 }

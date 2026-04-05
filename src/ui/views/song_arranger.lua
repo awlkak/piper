@@ -19,6 +19,7 @@
 --
 -- Keyboard (when focused):
 --   Left/Right   = move selected slot
+--   Space        = play from selected slot
 --   [ / ]        = previous / next pattern
 --   Ins / I      = insert slot after selected
 --   Del          = remove selected slot
@@ -26,6 +27,9 @@
 --   Ctrl+V       = paste slot after selected
 --   Ctrl+N       = new pattern
 --   Ctrl+D       = duplicate selected pattern
+--
+-- Double-click a slot header to play from that slot.
+-- Right-click a slot header for slot operations (including "Play from here").
 --
 -- Right-click a slot: "Assign selected pattern" to change what pattern plays in that slot
 
