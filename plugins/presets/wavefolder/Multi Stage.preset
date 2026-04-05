@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/wavefolder.lua",
+  name   = "Multi Stage",
+  author = "Piper",
+  params = {
+    drive  = 5.0,
+    stages = 4,
+    mix    = 1.0,
+  },
+}

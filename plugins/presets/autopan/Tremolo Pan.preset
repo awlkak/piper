@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/autopan.lua",
+  name   = "Tremolo Pan",
+  author = "Piper",
+  params = {
+    rate   = 4.0,
+    width  = 0.9,
+    center = 0,
+    shape  = 0,
+    phase  = 0,
+  },
+}

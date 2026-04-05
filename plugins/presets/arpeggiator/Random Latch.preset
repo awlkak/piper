@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/arpeggiator.lua",
+  name   = "Random Latch",
+  author = "Piper",
+  params = {
+    mode     = 3,
+    octaves  = 2,
+    gate_len = 0.4,
+    latch    = 1,
+  },
+}

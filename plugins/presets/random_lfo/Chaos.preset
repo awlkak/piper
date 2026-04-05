@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/random_lfo.lua",
+  name   = "Chaos",
+  author = "Piper",
+  params = {
+    rate   = 5.0,
+    depth  = 1.0,
+    offset = 0,
+    smooth = 0,
+    seed   = 0,
+  },
+}

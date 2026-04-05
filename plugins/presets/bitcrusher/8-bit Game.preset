@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bitcrusher.lua",
+  name   = "8-bit Game",
+  author = "Piper",
+  params = {
+    bits = 8,
+    rate = 1,
+    mix  = 1.0,
+  },
+}

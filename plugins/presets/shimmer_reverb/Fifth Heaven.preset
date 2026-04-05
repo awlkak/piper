@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/shimmer_reverb.lua",
+  name   = "Fifth Heaven",
+  author = "Piper",
+  params = {
+    size           = 0.75,
+    damp           = 0.35,
+    pitch_shift    = 1.5,
+    shimmer_amount = 0.5,
+    mix            = 0.4,
+    predelay       = 15,
+  },
+}

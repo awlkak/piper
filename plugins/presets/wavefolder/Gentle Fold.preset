@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/wavefolder.lua",
+  name   = "Gentle Fold",
+  author = "Piper",
+  params = {
+    drive  = 2.0,
+    stages = 1,
+    mix    = 0.7,
+  },
+}

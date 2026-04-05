@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/stereo_widener.lua",
+  name   = "Mono",
+  author = "Piper",
+  params = {
+    width     = 0,
+    bass_mono = 0,
+    bass_freq = 200,
+  },
+}

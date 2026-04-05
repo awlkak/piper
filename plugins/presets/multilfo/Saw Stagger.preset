@@ -1,0 +1,14 @@
+return {
+  plugin = "plugins/control/multilfo.lua",
+  name   = "Saw Stagger",
+  author = "Piper",
+  params = {
+    rate   = 2.0,
+    depth  = 1.0,
+    shape  = 3,
+    phase2 = 0.25,
+    phase3 = 0.5,
+    phase4 = 0.75,
+    offset = 0,
+  },
+}

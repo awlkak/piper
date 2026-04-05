@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/control/chord_generator.lua",
+  name   = "Minor Triad",
+  author = "Piper",
+  params = {
+    chord_type = 2,
+    spread     = 0,
+    inversion  = 0,
+  },
+}

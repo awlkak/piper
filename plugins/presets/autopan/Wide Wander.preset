@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/autopan.lua",
+  name   = "Wide Wander",
+  author = "Piper",
+  params = {
+    rate   = 0.1,
+    width  = 1.0,
+    center = 0,
+    shape  = 1,
+    phase  = 0,
+  },
+}

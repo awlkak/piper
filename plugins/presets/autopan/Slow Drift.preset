@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/autopan.lua",
+  name   = "Slow Drift",
+  author = "Piper",
+  params = {
+    rate   = 0.3,
+    width  = 0.6,
+    center = 0,
+    shape  = 0,
+    phase  = 0,
+  },
+}

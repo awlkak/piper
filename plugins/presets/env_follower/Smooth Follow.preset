@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/env_follower.lua",
+  name   = "Smooth Follow",
+  author = "Piper",
+  params = {
+    attack    = 20,
+    release   = 300,
+    mode      = 1,
+    gain      = 2.0,
+    threshold = 0.3,
+  },
+}

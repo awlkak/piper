@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/stereo_widener.lua",
+  name   = "Subtle Width",
+  author = "Piper",
+  params = {
+    width     = 1.2,
+    bass_mono = 1,
+    bass_freq = 200,
+  },
+}

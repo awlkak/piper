@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/lowpass.lua",
+  name   = "Dark Pad",
+  author = "Piper",
+  params = {
+    cutoff = 400,
+    res    = 0.7,
+  },
+}

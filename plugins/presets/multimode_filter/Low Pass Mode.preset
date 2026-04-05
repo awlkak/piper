@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/multimode_filter.lua",
+  name   = "Low Pass Mode",
+  author = "Piper",
+  params = {
+    cutoff    = 1000,
+    resonance = 0.5,
+    mode      = 0,
+    mix       = 1.0,
+  },
+}

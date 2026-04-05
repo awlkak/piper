@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/delay.lua",
+  name   = "Long Echo",
+  author = "Piper",
+  params = {
+    time     = 750,
+    feedback = 0.55,
+    wet      = 0.4,
+  },
+}

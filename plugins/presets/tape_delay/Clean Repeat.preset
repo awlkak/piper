@@ -1,0 +1,16 @@
+return {
+  plugin = "plugins/effects/tape_delay.lua",
+  name   = "Clean Repeat",
+  author = "Piper",
+  params = {
+    time          = 375,
+    feedback      = 0.4,
+    wow_rate      = 0.2,
+    wow_depth     = 1,
+    flutter_rate  = 5,
+    flutter_depth = 0.1,
+    saturation    = 1.0,
+    damp          = 0.3,
+    wet           = 0.35,
+  },
+}

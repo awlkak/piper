@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/comb_filter.lua",
+  name   = "Negative Comb",
+  author = "Piper",
+  params = {
+    time     = 8,
+    feedback = -0.7,
+    damp     = 0.2,
+    mix      = 0.5,
+  },
+}

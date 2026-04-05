@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bitcrusher.lua",
+  name   = "Lo-fi Vinyl",
+  author = "Piper",
+  params = {
+    bits = 12,
+    rate = 4,
+    mix  = 0.7,
+  },
+}

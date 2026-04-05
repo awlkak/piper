@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/formant_filter.lua",
+  name   = "Vowel A",
+  author = "Piper",
+  params = {
+    morph = 0,
+    gain  = 1.0,
+    mix   = 1.0,
+  },
+}

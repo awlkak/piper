@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/lfo.lua",
+  name   = "Slow Sine",
+  author = "Piper",
+  params = {
+    rate   = 0.2,
+    depth  = 1.0,
+    shape  = 0,
+    offset = 0,
+  },
+}

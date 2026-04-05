@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/limiter.lua",
+  name   = "Brick Wall",
+  author = "Piper",
+  params = {
+    ceiling   = -0.1,
+    release   = 50,
+    lookahead = 10,
+  },
+}

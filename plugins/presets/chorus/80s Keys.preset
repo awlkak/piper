@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/chorus.lua",
+  name   = "80s Keys",
+  author = "Piper",
+  params = {
+    rate   = 0.8,
+    depth  = 7,
+    delay  = 12,
+    mix    = 0.6,
+    spread = 0.9,
+  },
+}

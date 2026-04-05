@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/gate_effect.lua",
+  name   = "Soft Gate",
+  author = "Piper",
+  params = {
+    threshold = -50,
+    attack    = 10,
+    hold      = 50,
+    release   = 400,
+    range     = -30,
+  },
+}

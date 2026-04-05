@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bandpass.lua",
+  name   = "Wah Tone",
+  author = "Piper",
+  params = {
+    cutoff = 800,
+    q      = 5.0,
+    mix    = 1.0,
+  },
+}

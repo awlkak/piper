@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/delay.lua",
+  name   = "Wash",
+  author = "Piper",
+  params = {
+    time     = 500,
+    feedback = 0.75,
+    wet      = 0.5,
+  },
+}

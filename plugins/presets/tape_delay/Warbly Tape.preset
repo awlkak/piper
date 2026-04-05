@@ -1,0 +1,16 @@
+return {
+  plugin = "plugins/effects/tape_delay.lua",
+  name   = "Warbly Tape",
+  author = "Piper",
+  params = {
+    time          = 400,
+    feedback      = 0.5,
+    wow_rate      = 0.7,
+    wow_depth     = 15,
+    flutter_rate  = 10,
+    flutter_depth = 2.0,
+    saturation    = 2.5,
+    damp          = 0.5,
+    wet           = 0.45,
+  },
+}

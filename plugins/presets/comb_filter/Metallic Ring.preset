@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/comb_filter.lua",
+  name   = "Metallic Ring",
+  author = "Piper",
+  params = {
+    time     = 10,
+    feedback = 0.8,
+    damp     = 0.1,
+    mix      = 0.6,
+  },
+}

@@ -1,0 +1,14 @@
+return {
+  plugin = "plugins/control/multilfo.lua",
+  name   = "Stereo Drift",
+  author = "Piper",
+  params = {
+    rate   = 0.3,
+    depth  = 0.8,
+    shape  = 0,
+    phase2 = 0.5,
+    phase3 = 0.25,
+    phase4 = 0.75,
+    offset = 0,
+  },
+}

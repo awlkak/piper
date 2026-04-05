@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/env_follower.lua",
+  name   = "Gate Trigger",
+  author = "Piper",
+  params = {
+    attack    = 5,
+    release   = 100,
+    mode      = 0,
+    gain      = 1.0,
+    threshold = 0.4,
+  },
+}

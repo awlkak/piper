@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/control/chord_generator.lua",
+  name   = "Dominant 7th",
+  author = "Piper",
+  params = {
+    chord_type = 3,
+    spread     = 0,
+    inversion  = 0,
+  },
+}

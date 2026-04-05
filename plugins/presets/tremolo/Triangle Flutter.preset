@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/tremolo.lua",
+  name   = "Triangle Flutter",
+  author = "Piper",
+  params = {
+    rate         = 6.0,
+    depth        = 0.6,
+    shape        = 1,
+    stereo       = 1,
+    phase_offset = 0.25,
+  },
+}

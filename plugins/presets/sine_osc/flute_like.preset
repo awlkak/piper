@@ -1,0 +1,15 @@
+return {
+  plugin = "plugins/generators/sine_osc.lua",
+  name   = "Flute-like",
+  author = "Piper",
+  params = {
+    freq    = 440,
+    amp     = 0.5,
+    pan     = 0,
+    tune    = 0,
+    attack  = 0.08,
+    decay   = 0.05,
+    sustain = 0.85,
+    release = 0.25,
+  },
+}

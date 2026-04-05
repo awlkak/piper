@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/highpass.lua",
+  name   = "Rumble Cut",
+  author = "Piper",
+  params = {
+    cutoff = 80,
+    res    = 0.7,
+  },
+}

@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/compressor.lua",
+  name   = "Drums Punch",
+  author = "Piper",
+  params = {
+    threshold = -12,
+    ratio     = 6,
+    attack    = 3,
+    release   = 80,
+    knee      = 2,
+    makeup    = 4,
+  },
+}

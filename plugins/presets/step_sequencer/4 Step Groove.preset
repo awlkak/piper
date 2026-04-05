@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/step_sequencer.lua",
+  name   = "4 Step Groove",
+  author = "Piper",
+  params = {
+    steps     = 4,
+    direction = 0,
+    gate_len  = 0.7,
+    n1 = 60, n2 = 60, n3 = 64, n4 = 67,
+  },
+}

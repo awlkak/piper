@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/comb_filter.lua",
+  name   = "Comb Tone",
+  author = "Piper",
+  params = {
+    time     = 5,
+    feedback = 0.5,
+    damp     = 0.3,
+    mix      = 0.5,
+  },
+}

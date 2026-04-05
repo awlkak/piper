@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/ladder_filter.lua",
+  name   = "Self Oscillate",
+  author = "Piper",
+  params = {
+    cutoff    = 800,
+    resonance = 0.95,
+    drive     = 1.0,
+    mix       = 1.0,
+  },
+}

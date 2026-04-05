@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bandpass.lua",
+  name   = "Sub Isolator",
+  author = "Piper",
+  params = {
+    cutoff = 80,
+    q      = 1.5,
+    mix    = 1.0,
+  },
+}

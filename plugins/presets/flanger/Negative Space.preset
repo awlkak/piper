@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/flanger.lua",
+  name   = "Negative Space",
+  author = "Piper",
+  params = {
+    rate     = 0.2,
+    depth    = 3.0,
+    delay    = 0.8,
+    feedback = -0.7,
+    mix      = 0.6,
+  },
+}

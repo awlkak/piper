@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/env_follower.lua",
+  name   = "RMS Level",
+  author = "Piper",
+  params = {
+    attack    = 50,
+    release   = 200,
+    mode      = 1,
+    gain      = 1.0,
+    threshold = 0.5,
+  },
+}

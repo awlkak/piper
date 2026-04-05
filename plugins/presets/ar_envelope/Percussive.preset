@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/control/ar_envelope.lua",
+  name   = "Percussive",
+  author = "Piper",
+  params = {
+    attack  = 0.005,
+    release = 0.3,
+    curve   = 0.9,
+  },
+}

@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/diffusion_reverb.lua",
+  name   = "Bright Studio",
+  author = "Piper",
+  params = {
+    size      = 0.4,
+    damp      = 0.2,
+    diffusion = 0.8,
+    predelay  = 5,
+    mix       = 0.25,
+    width     = 0.8,
+  },
+}

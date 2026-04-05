@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/clock_divider.lua",
+  name   = "Halve Quarter",
+  author = "Piper",
+  params = {
+    div1 = 1,
+    div2 = 2,
+    div3 = 4,
+    div4 = 8,
+  },
+}

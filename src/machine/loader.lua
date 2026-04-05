@@ -33,6 +33,8 @@ local function make_sandbox(sample_rate, block_size)
         pan_gains  = DSP.pan_gains,
         biquad_lowpass  = DSP.biquad_lowpass,
         biquad_highpass = DSP.biquad_highpass,
+        -- Audio file loading (safe subset of love.sound)
+        load_sound      = function(path) return love.sound.newSoundData(path) end,
     }
 
     local env = {

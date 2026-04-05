@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/pingpong_delay.lua",
+  name   = "Eighth Ping Pong",
+  author = "Piper",
+  params = {
+    time     = 187,
+    feedback = 0.5,
+    offset   = 1.0,
+    damp     = 0.3,
+    wet      = 0.4,
+  },
+}

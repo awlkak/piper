@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/gain.lua",
+  name   = "Unity",
+  author = "Piper",
+  params = {
+    gain = 0,
+    pan  = 0,
+  },
+}

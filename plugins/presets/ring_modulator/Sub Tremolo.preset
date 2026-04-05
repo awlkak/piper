@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/ring_modulator.lua",
+  name   = "Sub Tremolo",
+  author = "Piper",
+  params = {
+    freq  = 3,
+    shape = 0,
+    depth = 0.6,
+    mode  = 0,
+    mix   = 1.0,
+  },
+}

@@ -69,6 +69,22 @@ function Machine.validate(def)
         assert(type(def.new) == "function",
             "non-abstraction plugin must have a .new factory function")
     end
+
+    -- Optional custom UI panel
+    if def.gui ~= nil then
+        assert(type(def.gui) == "table", "plugin.gui must be a table")
+        assert(type(def.gui.height) == "number" and def.gui.height > 0,
+            "plugin.gui.height must be a positive number")
+        assert(type(def.gui.draw) == "function", "plugin.gui.draw must be a function")
+        if def.gui.on_event ~= nil then
+            assert(type(def.gui.on_event) == "function",
+                "plugin.gui.on_event must be a function if provided")
+        end
+        if def.gui.width ~= nil then
+            assert(type(def.gui.width) == "number" and def.gui.width > 0,
+                "plugin.gui.width must be a positive number if provided")
+        end
+    end
 end
 
 -- Create a default no-op instance for testing / fallback.

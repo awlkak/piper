@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/diffusion_reverb.lua",
+  name   = "Infinite Pad",
+  author = "Piper",
+  params = {
+    size      = 1.0,
+    damp      = 0.2,
+    diffusion = 1.0,
+    predelay  = 0,
+    mix       = 0.6,
+    width     = 1.0,
+  },
+}

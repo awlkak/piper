@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/lfo.lua",
+  name   = "Square Gate",
+  author = "Piper",
+  params = {
+    rate   = 2.0,
+    depth  = 1.0,
+    shape  = 2,
+    offset = 0,
+  },
+}

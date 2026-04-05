@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/compressor.lua",
+  name   = "Gentle Glue",
+  author = "Piper",
+  params = {
+    threshold = -18,
+    ratio     = 2,
+    attack    = 20,
+    release   = 150,
+    knee      = 6,
+    makeup    = 3,
+  },
+}

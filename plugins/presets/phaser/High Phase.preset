@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/phaser.lua",
+  name   = "High Phase",
+  author = "Piper",
+  params = {
+    rate     = 0.6,
+    depth    = 0.9,
+    center   = 3000,
+    feedback = 0.6,
+    mix      = 0.5,
+  },
+}

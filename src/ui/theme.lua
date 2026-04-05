@@ -82,7 +82,7 @@ end
 
 -- Call on resize to adjust sizes for DPI / mobile screen size
 function Theme.apply_dpi(screen_w, screen_h)
-    local dpi   = love.window.getDPIScale() or 1
+    local dpi   = (love.window and love.window.getDPIScale and love.window.getDPIScale()) or 1
     local mobile = screen_w < 800
 
     if mobile then

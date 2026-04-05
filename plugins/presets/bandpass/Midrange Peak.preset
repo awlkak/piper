@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bandpass.lua",
+  name   = "Midrange Peak",
+  author = "Piper",
+  params = {
+    cutoff = 1000,
+    q      = 2.0,
+    mix    = 1.0,
+  },
+}

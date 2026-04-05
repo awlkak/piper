@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/spring_reverb.lua",
+  name   = "Surf Boing",
+  author = "Piper",
+  params = {
+    tension = 0.8,
+    length  = 0.7,
+    damp    = 0.3,
+    mix     = 0.5,
+    drip    = 0.8,
+  },
+}

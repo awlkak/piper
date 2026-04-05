@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/control/ar_envelope.lua",
+  name   = "Slow Swell",
+  author = "Piper",
+  params = {
+    attack  = 1.0,
+    release = 2.0,
+    curve   = 0.3,
+  },
+}

@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/wavefolder.lua",
+  name   = "Harsh Fold",
+  author = "Piper",
+  params = {
+    drive  = 8.0,
+    stages = 2,
+    mix    = 1.0,
+  },
+}

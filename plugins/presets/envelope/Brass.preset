@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/envelope.lua",
+  name   = "Brass",
+  author = "Piper",
+  params = {
+    attack  = 0.08,
+    decay   = 0.1,
+    sustain = 0.9,
+    release = 0.2,
+  },
+}

@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/ladder_filter.lua",
+  name   = "Warm Bass Cut",
+  author = "Piper",
+  params = {
+    cutoff    = 300,
+    resonance = 0.2,
+    drive     = 1.5,
+    mix       = 1.0,
+  },
+}

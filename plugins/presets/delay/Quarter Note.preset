@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/delay.lua",
+  name   = "Quarter Note",
+  author = "Piper",
+  params = {
+    time     = 375,
+    feedback = 0.45,
+    wet      = 0.35,
+  },
+}

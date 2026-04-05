@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/reverb.lua",
+  name   = "Room",
+  author = "Piper",
+  params = {
+    room     = 0.4,
+    damp     = 0.6,
+    width    = 0.7,
+    mix      = 0.2,
+    predelay = 5,
+  },
+}

@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/math_node.lua",
+  name   = "Add Constant",
+  author = "Piper",
+  params = {
+    op    = 0,
+    a     = 1.0,
+    b     = 0.0,
+    const = 0.5,
+  },
+}

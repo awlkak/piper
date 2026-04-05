@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/highpass.lua",
+  name   = "Thin Out",
+  author = "Piper",
+  params = {
+    cutoff = 600,
+    res    = 0.7,
+  },
+}

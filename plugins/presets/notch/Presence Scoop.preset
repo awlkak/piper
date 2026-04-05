@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/notch.lua",
+  name   = "Presence Scoop",
+  author = "Piper",
+  params = {
+    cutoff = 3000,
+    q      = 1.5,
+    mix    = 1.0,
+  },
+}

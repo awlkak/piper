@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/notch.lua",
+  name   = "Mid Cut",
+  author = "Piper",
+  params = {
+    cutoff = 1000,
+    q      = 2.0,
+    mix    = 1.0,
+  },
+}

@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/lowpass.lua",
+  name   = "Warm Low End",
+  author = "Piper",
+  params = {
+    cutoff = 800,
+    res    = 0.5,
+  },
+}

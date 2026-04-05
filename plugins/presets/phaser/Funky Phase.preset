@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/phaser.lua",
+  name   = "Funky Phase",
+  author = "Piper",
+  params = {
+    rate     = 2.0,
+    depth    = 0.6,
+    center   = 800,
+    feedback = 0.7,
+    mix      = 0.5,
+  },
+}

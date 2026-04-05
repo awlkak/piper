@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/tremolo.lua",
+  name   = "Classic Tremolo",
+  author = "Piper",
+  params = {
+    rate         = 5.0,
+    depth        = 0.7,
+    shape        = 0,
+    stereo       = 0,
+    phase_offset = 0.25,
+  },
+}

@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/diffusion_reverb.lua",
+  name   = "Small Room",
+  author = "Piper",
+  params = {
+    size      = 0.3,
+    damp      = 0.6,
+    diffusion = 0.7,
+    predelay  = 2,
+    mix       = 0.2,
+    width     = 0.7,
+  },
+}

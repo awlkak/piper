@@ -1,0 +1,17 @@
+return {
+  plugin = "plugins/control/mseg_envelope.lua",
+  name   = "Attack Decay",
+  author = "Piper",
+  params = {
+    loop_start = 3,
+    loop_end   = 5,
+    loop       = 0,
+    l1 = 1,   t1 = 0.005,
+    l2 = 0,   t2 = 0.4,
+    l3 = 0,   t3 = 0,
+    l4 = 0,   t4 = 0,
+    l5 = 0,   t5 = 0,
+    l6 = 0,   t6 = 0,
+    l7 = 0,   t7 = 0,
+  },
+}

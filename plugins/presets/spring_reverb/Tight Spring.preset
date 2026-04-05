@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/spring_reverb.lua",
+  name   = "Tight Spring",
+  author = "Piper",
+  params = {
+    tension = 0.9,
+    length  = 0.2,
+    damp    = 0.6,
+    mix     = 0.25,
+    drip    = 0.2,
+  },
+}

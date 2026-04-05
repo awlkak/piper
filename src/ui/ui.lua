@@ -9,6 +9,8 @@ local PatternEditor = require("src.ui.views.pattern_editor")
 local PatchGraph   = require("src.ui.views.patch_graph")
 local SongArranger = require("src.ui.views.song_arranger")
 
+local HAS_CURSOR = love.mouse ~= nil and love.mouse.getSystemCursor ~= nil
+
 local UI = {}
 
 -- Views
@@ -248,12 +250,14 @@ function UI._draw_dividers()
     end
 
     -- Set resize cursor when hovering dividers
-    if hov_v then
-        love.mouse.setCursor(love.mouse.getSystemCursor("sizewe"))
-    elseif hov_h then
-        love.mouse.setCursor(love.mouse.getSystemCursor("sizens"))
-    elseif not divider_drag then
-        love.mouse.setCursor(love.mouse.getSystemCursor("arrow"))
+    if HAS_CURSOR then
+        if hov_v then
+            love.mouse.setCursor(love.mouse.getSystemCursor("sizewe"))
+        elseif hov_h then
+            love.mouse.setCursor(love.mouse.getSystemCursor("sizens"))
+        elseif not divider_drag then
+            love.mouse.setCursor(love.mouse.getSystemCursor("arrow"))
+        end
     end
 end
 
@@ -502,7 +506,9 @@ function UI.handle_events()
                 goto next_event
             elseif ev.type == "pointer_up" then
                 divider_drag = nil
-                love.mouse.setCursor(love.mouse.getSystemCursor("arrow"))
+                if HAS_CURSOR then
+                    love.mouse.setCursor(love.mouse.getSystemCursor("arrow"))
+                end
                 goto next_event
             end
         end

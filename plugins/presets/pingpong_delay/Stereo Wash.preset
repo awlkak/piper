@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/pingpong_delay.lua",
+  name   = "Stereo Wash",
+  author = "Piper",
+  params = {
+    time     = 300,
+    feedback = 0.7,
+    offset   = 1.0,
+    damp     = 0.6,
+    wet      = 0.5,
+  },
+}

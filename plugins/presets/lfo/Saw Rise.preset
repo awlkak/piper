@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/lfo.lua",
+  name   = "Saw Rise",
+  author = "Piper",
+  params = {
+    rate   = 1.0,
+    depth  = 1.0,
+    shape  = 3,
+    offset = 0,
+  },
+}

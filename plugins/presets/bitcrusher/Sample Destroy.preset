@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bitcrusher.lua",
+  name   = "Sample Destroy",
+  author = "Piper",
+  params = {
+    bits = 3,
+    rate = 16,
+    mix  = 1.0,
+  },
+}

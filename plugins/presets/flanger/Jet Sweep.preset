@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/flanger.lua",
+  name   = "Jet Sweep",
+  author = "Piper",
+  params = {
+    rate     = 0.3,
+    depth    = 2.5,
+    delay    = 0.5,
+    feedback = 0.7,
+    mix      = 0.5,
+  },
+}

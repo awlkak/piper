@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/env_follower.lua",
+  name   = "Tight Follow",
+  author = "Piper",
+  params = {
+    attack    = 2,
+    release   = 30,
+    mode      = 0,
+    gain      = 1.0,
+    threshold = 0.5,
+  },
+}

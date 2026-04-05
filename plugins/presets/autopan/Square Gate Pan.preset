@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/autopan.lua",
+  name   = "Square Gate Pan",
+  author = "Piper",
+  params = {
+    rate   = 2.0,
+    width  = 1.0,
+    center = 0,
+    shape  = 2,
+    phase  = 0,
+  },
+}

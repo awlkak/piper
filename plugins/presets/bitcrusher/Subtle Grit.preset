@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bitcrusher.lua",
+  name   = "Subtle Grit",
+  author = "Piper",
+  params = {
+    bits = 14,
+    rate = 2,
+    mix  = 0.5,
+  },
+}

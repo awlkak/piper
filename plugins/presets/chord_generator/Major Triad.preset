@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/control/chord_generator.lua",
+  name   = "Major Triad",
+  author = "Piper",
+  params = {
+    chord_type = 1,
+    spread     = 0,
+    inversion  = 0,
+  },
+}

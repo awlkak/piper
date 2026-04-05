@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/delay.lua",
+  name   = "Eighth Note",
+  author = "Piper",
+  params = {
+    time     = 187,
+    feedback = 0.4,
+    wet      = 0.35,
+  },
+}

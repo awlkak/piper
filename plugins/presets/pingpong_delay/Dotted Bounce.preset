@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/pingpong_delay.lua",
+  name   = "Dotted Bounce",
+  author = "Piper",
+  params = {
+    time     = 562,
+    feedback = 0.5,
+    offset   = 1.5,
+    damp     = 0.5,
+    wet      = 0.35,
+  },
+}

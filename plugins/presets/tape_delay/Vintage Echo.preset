@@ -1,0 +1,16 @@
+return {
+  plugin = "plugins/effects/tape_delay.lua",
+  name   = "Vintage Echo",
+  author = "Piper",
+  params = {
+    time          = 375,
+    feedback      = 0.45,
+    wow_rate      = 0.3,
+    wow_depth     = 5,
+    flutter_rate  = 8,
+    flutter_depth = 0.5,
+    saturation    = 1.5,
+    damp          = 0.4,
+    wet           = 0.4,
+  },
+}

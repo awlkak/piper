@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/attenuverter.lua",
+  name   = "Full Scale",
+  author = "Piper",
+  params = {
+    amount    = 1.0,
+    offset    = 0,
+    range_min = -1,
+    range_max = 1,
+  },
+}

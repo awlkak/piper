@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/shimmer_reverb.lua",
+  name   = "Subtle Shimmer",
+  author = "Piper",
+  params = {
+    size           = 0.6,
+    damp           = 0.5,
+    pitch_shift    = 2.0,
+    shimmer_amount = 0.2,
+    mix            = 0.25,
+    predelay       = 5,
+  },
+}

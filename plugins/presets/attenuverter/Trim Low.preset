@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/attenuverter.lua",
+  name   = "Trim Low",
+  author = "Piper",
+  params = {
+    amount    = 0.2,
+    offset    = 0,
+    range_min = -1,
+    range_max = 1,
+  },
+}

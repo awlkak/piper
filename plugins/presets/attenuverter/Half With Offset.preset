@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/attenuverter.lua",
+  name   = "Half With Offset",
+  author = "Piper",
+  params = {
+    amount    = 0.5,
+    offset    = 0.5,
+    range_min = 0,
+    range_max = 1,
+  },
+}

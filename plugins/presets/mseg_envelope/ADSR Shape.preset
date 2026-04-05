@@ -1,0 +1,17 @@
+return {
+  plugin = "plugins/control/mseg_envelope.lua",
+  name   = "ADSR Shape",
+  author = "Piper",
+  params = {
+    loop_start = 3,
+    loop_end   = 5,
+    loop       = 0,
+    l1 = 1,   t1 = 0.01,
+    l2 = 0.7, t2 = 0.1,
+    l3 = 0.7, t3 = 0,
+    l4 = 0.7, t4 = 0.2,
+    l5 = 0,   t5 = 0.3,
+    l6 = 0,   t6 = 0,
+    l7 = 0,   t7 = 0,
+  },
+}

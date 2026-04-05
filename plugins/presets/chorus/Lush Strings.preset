@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/chorus.lua",
+  name   = "Lush Strings",
+  author = "Piper",
+  params = {
+    rate   = 0.4,
+    depth  = 10,
+    delay  = 15,
+    mix    = 0.5,
+    spread = 0.8,
+  },
+}

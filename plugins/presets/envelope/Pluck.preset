@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/envelope.lua",
+  name   = "Pluck",
+  author = "Piper",
+  params = {
+    attack  = 0.002,
+    decay   = 0.15,
+    sustain = 0,
+    release = 0.05,
+  },
+}

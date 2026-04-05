@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/control/ar_envelope.lua",
+  name   = "Long Bloom",
+  author = "Piper",
+  params = {
+    attack  = 2.0,
+    release = 4.0,
+    curve   = 0.2,
+  },
+}

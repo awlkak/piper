@@ -22,6 +22,7 @@ local Registry  = require("src.machine.registry")
 local Loader    = require("src.machine.loader")
 local Discovery = require("src.project.discovery")
 local Engine    = require("src.audio.engine")
+local Preset    = require("src.machine.preset")
 
 local PatchGraph = {}
 PatchGraph.__index = PatchGraph
@@ -39,10 +40,31 @@ local PE_W        = 220    -- param editor panel width
 local PE_H        = 112    -- param editor panel height
 local PE_HDR_H    = 20     -- param editor title bar height
 
+local MAX_CUSTOM_W = 400   -- cap on gui.width override
+
 local function node_height(def)
     if not def then return HDR_H end
-    local n = def.params and #def.params or 0
-    return HDR_H + n * PARAM_H + 6
+    local n     = def.params and #def.params or 0
+    local gui_h = def.gui and def.gui.height or 0
+    return HDR_H + gui_h + n * PARAM_H + 6
+end
+
+local function node_width(def)
+    if def and def.gui and def.gui.width then
+        return math.min(def.gui.width, MAX_CUSTOM_W)
+    end
+    return NODE_W
+end
+
+-- Bring a node to the front of the z-order (call on any interaction)
+local function bring_to_front(node_order, id)
+    for i = #node_order, 1, -1 do
+        if node_order[i] == id then
+            table.remove(node_order, i)
+            break
+        end
+    end
+    table.insert(node_order, id)
 end
 
 -- Pin world positions for a node
@@ -53,7 +75,7 @@ end
 
 local function outlet_pos(node, pin_idx, n_outlets)
     local nh = node_height(node.def)
-    return node.x + NODE_W, node.y + HDR_H + (pin_idx / (n_outlets + 1)) * (nh - HDR_H)
+    return node.x + node_width(node.def), node.y + HDR_H + (pin_idx / (n_outlets + 1)) * (nh - HDR_H)
 end
 
 -- Hit-test a pin; returns pin index and kind, or nil
@@ -95,13 +117,13 @@ end
 -- Hit-test a node body (world coords)
 local function hit_node(node, wx, wy)
     local nh = node_height(node.def)
-    return wx >= node.x and wx < node.x + NODE_W
+    return wx >= node.x and wx < node.x + node_width(node.def)
        and wy >= node.y and wy < node.y + nh
 end
 
 -- Hit-test node header only
 local function hit_header(node, wx, wy)
-    return wx >= node.x and wx < node.x + NODE_W
+    return wx >= node.x and wx < node.x + node_width(node.def)
        and wy >= node.y and wy < node.y + HDR_H
 end
 
@@ -109,9 +131,10 @@ end
 local function hit_param(node, wx, wy)
     if not node.def or not node.def.params then return nil end
     local params = node.def.params
+    local gui_h  = (node.def.gui and node.def.gui.height or 0)
     for i = 1, #params do
-        local py = node.y + HDR_H + (i - 1) * PARAM_H
-        if wx >= node.x and wx < node.x + NODE_W
+        local py = node.y + HDR_H + gui_h + (i - 1) * PARAM_H
+        if wx >= node.x and wx < node.x + node_width(node.def)
         and wy >= py    and wy < py + PARAM_H then
             return i
         end
@@ -192,6 +215,10 @@ function PatchGraph.new()
 
         -- File picker (for "file" type params)
         file_picker  = nil,   -- { node_id, param_idx, path_str, files={}, scroll }
+
+        -- Preset picker
+        preset_picker = nil,  -- { node_id, filter, scroll, presets, selected, saved_params, saving, save_name }
+
         -- spawn_pos: world coords to place next spawned machine (from bg right-click)
         spawn_wx     = nil,
         spawn_wy     = nil,
@@ -208,6 +235,12 @@ function PatchGraph.new()
 
         focused      = false,
         error_msg    = nil,   -- short error string shown in graph (cleared on next spawn)
+
+        -- Custom GUI panel state keyed by node id
+        node_gui_state = {},
+
+        -- Z-order: list of node IDs in draw order (last = on top)
+        node_order = {},
 
         -- Callback: called when a new machine is added (for app-level wiring)
         on_add_machine = nil,
@@ -283,9 +316,25 @@ function PatchGraph:draw(rect)
         love.graphics.setLineWidth(1)
     end
 
-    -- Nodes
-    for id, node in pairs(nodes) do
-        self:_draw_node(id, node, z, ox, oy)
+    -- Sync node_order: add any nodes not yet tracked (e.g. loaded from project)
+    local ordered_set = {}
+    for _, id in ipairs(self.node_order) do ordered_set[id] = true end
+    for id in pairs(nodes) do
+        if not ordered_set[id] then
+            table.insert(self.node_order, id)
+        end
+    end
+    -- Remove stale IDs from node_order
+    for i = #self.node_order, 1, -1 do
+        if not nodes[self.node_order[i]] then
+            table.remove(self.node_order, i)
+        end
+    end
+
+    -- Nodes (draw in z-order; last = on top)
+    for _, id in ipairs(self.node_order) do
+        local node = nodes[id]
+        if node then self:_draw_node(id, node, z, ox, oy, rect) end
     end
 
     love.graphics.setScissor()
@@ -306,6 +355,12 @@ function PatchGraph:draw(rect)
     if self.file_picker then
         love.graphics.setColor(1, 1, 1, 1)
         self:_draw_file_picker(rect)
+    end
+
+    -- Preset picker overlay
+    if self.preset_picker then
+        love.graphics.setColor(1, 1, 1, 1)
+        self:_draw_preset_picker(rect)
     end
 
     -- Toolbar: "+" button and hint
@@ -439,9 +494,61 @@ function PatchGraph:_draw_bezier(x1, y1, x2, y2)
         x2, y2)
 end
 
-function PatchGraph:_draw_node(id, node, z, ox, oy)
+local function build_gui_ctx(bsx, bsy, bsw, bsh, z, mx, my)
+    local Theme   = require("src.ui.theme")
+    local Widgets = require("src.ui.widgets")
+    local ox, oy = bsx, bsy
+    local ctx = {
+        w       = bsw,
+        h       = bsh,
+        z       = z,
+        mouse_x = mx - bsx,
+        mouse_y = my - bsy,
+        theme   = Theme,
+    }
+    function ctx.rect(x, y, w, h, fill, border, radius)
+        Widgets.rect(ox+x, oy+y, w, h, fill, border, radius)
+    end
+    function ctx.label(text, x, y, w, h, color, font, align)
+        Widgets.label(text, ox+x, oy+y, w, h, color, font, align)
+    end
+    function ctx.line(x1, y1, x2, y2, color, width)
+        if color then Theme.set(color) end
+        love.graphics.setLineWidth(width or 1)
+        love.graphics.line(ox+x1, oy+y1, ox+x2, oy+y2)
+        love.graphics.setLineWidth(1)
+    end
+    function ctx.circle(x, y, r, mode, color)
+        if color then Theme.set(color) end
+        love.graphics.circle(mode or "fill", ox+x, oy+y, r)
+    end
+    function ctx.plot(points, color, width)
+        if #points < 4 then return end
+        if color then Theme.set(color) end
+        love.graphics.setLineWidth(width or 1)
+        local pts = {}
+        for i = 1, #points, 2 do
+            pts[#pts+1] = ox + points[i]
+            pts[#pts+1] = oy + points[i+1]
+        end
+        love.graphics.line(pts)
+        love.graphics.setLineWidth(1)
+    end
+    function ctx.button(text, x, y, w, h, hovered, pressed)
+        Widgets.button(text, ox+x, oy+y, w, h, hovered, pressed)
+    end
+    function ctx.slider(x, y, w, h, value, min_val, max_val, hovered)
+        Widgets.slider(ox+x, oy+y, w, h, value, min_val, max_val, hovered)
+    end
+    function ctx.scrollbar(x, y, w, h, offset, content_h, view_h)
+        return Widgets.scrollbar(ox+x, oy+y, w, h, offset, content_h, view_h)
+    end
+    return ctx
+end
+
+function PatchGraph:_draw_node(id, node, z, ox, oy, rect)
     local nx, ny = node.x * z + ox, node.y * z + oy
-    local nw     = NODE_W * z
+    local nw     = node_width(node.def) * z
     local nh     = node_height(node.def) * z
     local is_sel    = (id == self.selected)
     local is_master = (id == DAG.master_id())
@@ -474,8 +581,27 @@ function PatchGraph:_draw_node(id, node, z, ox, oy)
     Widgets.rect(nx, ny, nw, hdr_h, hdr_c, nil, 5 * z)
 
     -- Node name + type badge
+    -- Reserve 16px on right for ▾ preset button (shrink name area, don't change NODE_W)
     local name = is_master and "MASTER" or (node.def and node.def.name or id)
-    Widgets.label(name, nx + 6, ny, nw - 28, hdr_h, Theme.text, Theme.font_small)
+    Widgets.label(name, nx + 6, ny, nw - 44, hdr_h, Theme.text, Theme.font_small)
+
+    -- ▾ preset picker button (right edge of header, always visible)
+    do
+        local pbw = 16 * z
+        local pbx = nx + nw - pbw
+        -- Slightly lighter than header color
+        local pb_c = {
+            math.min(1, hdr_c[1] + 0.08),
+            math.min(1, hdr_c[2] + 0.08),
+            math.min(1, hdr_c[3] + 0.08),
+            1,
+        }
+        Theme.set(pb_c)
+        love.graphics.rectangle("fill", pbx, ny, pbw, hdr_h)
+        Theme.set(Theme.text_dim)
+        love.graphics.setFont(Theme.font_small)
+        love.graphics.printf("\xe2\x96\xbe", pbx, ny + (hdr_h - Theme.font_small:getHeight()) * 0.5, pbw, "center")
+    end
 
     -- Delete button in header (×) — only on non-master
     if not is_master and (is_sel or is_hov) then
@@ -485,13 +611,44 @@ function PatchGraph:_draw_node(id, node, z, ox, oy)
         love.graphics.rectangle("fill", bx, ny + 3 * z, bw, hdr_h - 6 * z, 3, 3)
         Theme.set(Theme.text)
         love.graphics.setFont(Theme.font_small)
-        love.graphics.printf("×", bx, ny + (hdr_h - (Theme.font_small:getHeight())) * 0.5, bw, "center")
+        love.graphics.printf("\xc3\x97", bx, ny + (hdr_h - (Theme.font_small:getHeight())) * 0.5, bw, "center")
+    end
+
+    -- Custom GUI panel (drawn above param rows, clipped to panel bounds)
+    if node.def and node.def.gui then
+        local gui_h  = node.def.gui.height
+        local panel_sx = nx
+        local panel_sy = ny + hdr_h
+        local panel_sw = nw
+        local panel_sh = gui_h * z
+
+        love.graphics.setScissor(panel_sx, panel_sy, panel_sw, panel_sh)
+
+        local gui_state = self.node_gui_state[id] or {}
+        self.node_gui_state[id] = gui_state
+
+        -- Let the instance push live data into gui_state
+        local nd2 = DAG.get_nodes()[id]
+        if nd2 and nd2.instance and type(nd2.instance.get_ui_state) == "function" then
+            local ok2, ui_data = pcall(nd2.instance.get_ui_state, nd2.instance)
+            if ok2 and type(ui_data) == "table" then
+                for k, v in pairs(ui_data) do gui_state[k] = v end
+            end
+        end
+
+        local mx2, my2 = love.mouse.getPosition()
+        local gctx = build_gui_ctx(panel_sx, panel_sy, panel_sw, panel_sh, z, mx2, my2)
+        pcall(node.def.gui.draw, gctx, gui_state)
+
+        -- Restore the view-level scissor
+        love.graphics.setScissor(rect.x, rect.y, rect.w, rect.h)
     end
 
     -- Params
     if node.def and node.def.params then
+        local gui_h_px = (node.def.gui and node.def.gui.height or 0) * z
         for i, p in ipairs(node.def.params) do
-            local py    = ny + hdr_h + (i - 1) * PARAM_H * z
+            local py    = ny + hdr_h + gui_h_px + (i - 1) * PARAM_H * z
             local val   = node.params and node.params[p.id]
             if val == nil then val = p.default end
             local is_editing = self.edit_param
@@ -687,11 +844,15 @@ function PatchGraph:_draw_param_editor()
     Widgets.rect(px, py + PE_HDR_H, PE_W, PE_H - PE_HDR_H, Theme.bg_panel, Theme.border_focus, 4)
     love.graphics.rectangle("fill", px, py + PE_HDR_H, PE_W, 4)  -- square top corners on body
 
-    -- Value display
+    -- Value display (tappable text field)
+    local val_y = py + PE_HDR_H + 4
+    local val_h = 22
+    local field_bg     = ep.typing and {0.10,0.12,0.18,1} or {0.09,0.09,0.13,1}
+    local field_border = ep.typing and Theme.border_focus or Theme.border
+    Widgets.rect(px + 8, val_y, PE_W - 16, val_h, field_bg, field_border, 3)
     local disp = ep.value_str .. (ep.typing and "_" or "")
-    love.graphics.setColor(Theme.accent[1], Theme.accent[2], Theme.accent[3], 1)
-    love.graphics.setFont(Theme.font_medium)
-    love.graphics.printf(disp, px + 4, py + PE_HDR_H + 4, PE_W - 8, "center")
+    Widgets.label(disp, px + 8, val_y, PE_W - 16, val_h,
+                  ep.typing and Theme.accent or Theme.text, Theme.font_medium, "center")
 
     -- Slider track
     local cur_val = tonumber(ep.value_str) or 0
@@ -726,46 +887,59 @@ function PatchGraph:_draw_param_editor()
     Widgets.button("++", px + 4 + (btn_w+2)*3, btn_y, btn_w, btn_h, false, false, Theme.font_small)
 end
 
--- Scan for audio files in LÖVE save dir and source dir
-local function scan_audio_files()
+local AUDIO_EXTS = { wav=true, ogg=true, mp3=true, flac=true, aif=true, aiff=true }
+
+local function scan_dir_entries(dir)
+    local dirs  = {}
     local files = {}
-    local exts  = { wav=true, ogg=true, mp3=true, flac=true }
-    local function scan_dir(dir)
-        local ok, items = pcall(love.filesystem.getDirectoryItems, dir)
-        if not ok then return end
-        for _, name in ipairs(items) do
-            local ext = name:match("%.(%w+)$")
-            if ext and exts[ext:lower()] then
-                table.insert(files, (dir ~= "" and dir .. "/" or "") .. name)
+    local ok, items = pcall(love.filesystem.getDirectoryItems, dir)
+    if not ok or not items then return {} end
+    for _, name in ipairs(items) do
+        if name:sub(1,1) ~= "." then
+            local full = dir ~= "" and (dir .. "/" .. name) or name
+            local info = love.filesystem.getInfo(full)
+            if info then
+                if info.type == "directory" then
+                    table.insert(dirs, { name=name, is_dir=true, path=full })
+                else
+                    local ext = name:match("%.(%w+)$")
+                    if ext and AUDIO_EXTS[ext:lower()] then
+                        table.insert(files, { name=name, is_dir=false, path=full })
+                    end
+                end
             end
         end
     end
-    scan_dir("")          -- save dir root
-    scan_dir("samples")   -- common samples subfolder
-    scan_dir("audio")
-    scan_dir("sounds")
-    -- Also source dir via love.filesystem (mounted automatically)
-    return files
+    table.sort(dirs,  function(a,b) return a.name < b.name end)
+    table.sort(files, function(a,b) return a.name < b.name end)
+    local entries = {}
+    for _, e in ipairs(dirs)  do table.insert(entries, e) end
+    for _, e in ipairs(files) do table.insert(entries, e) end
+    return entries
 end
 
 function PatchGraph:_open_file_picker(node_id, param_idx, current_val)
-    local files = scan_audio_files()
+    local cur = tostring(current_val or "")
+    local cwd = cur ~= "" and (cur:match("^(.*)/[^/]+$") or "") or ""
     self.file_picker = {
         node_id   = node_id,
         param_idx = param_idx,
-        path_str  = tostring(current_val or ""),
-        files     = files,
+        path_str  = cur,
+        cwd       = cwd,
+        entries   = scan_dir_entries(cwd),
         scroll    = 0,
     }
-    self.edit_param = nil   -- close numeric editor if open
+    self.edit_param = nil
 end
 
 local FP_W, FP_H = 380, 280
 local FP_ROW_H   = 22
 
+local PP_W, PP_H = 380, 300
+local PP_ROW_H   = 22
+
 function PatchGraph:_draw_file_picker(rect)
     local fp = self.file_picker
-    -- Center the picker in the view
     local px = rect.x + math.floor((rect.w - FP_W) * 0.5)
     local py = rect.y + math.floor((rect.h - FP_H) * 0.5)
 
@@ -782,32 +956,46 @@ function PatchGraph:_draw_file_picker(rect)
     Theme.set(Theme.border)
     love.graphics.line(px, py + 22, px + FP_W, py + 22)
 
-    -- Path input row
-    local input_y = py + 26
-    Widgets.label("Path:", px + 4, input_y, 34, FP_ROW_H, Theme.text_dim, Theme.font_small)
-    -- Text field background
+    -- Breadcrumb (current directory)
+    local cwd_display = fp.cwd == "" and "(root)" or fp.cwd
+    Widgets.label("\xe2\x96\xb8 " .. cwd_display, px + 4, py + 24, FP_W - 8, FP_ROW_H,
+                  Theme.text_dim, Theme.font_small)
+    Theme.set(Theme.border)
+    love.graphics.line(px, py + 24 + FP_ROW_H, px + FP_W, py + 24 + FP_ROW_H)
+
+    -- Selected file field
+    local input_y = py + 24 + FP_ROW_H + 2
+    Widgets.label("File:", px + 4, input_y, 30, FP_ROW_H, Theme.text_dim, Theme.font_small)
     Theme.set({0.08, 0.08, 0.11, 1})
-    love.graphics.rectangle("fill", px + 40, input_y + 2, FP_W - 88, FP_ROW_H - 4, 2, 2)
-    Theme.set(Theme.border_focus)
-    love.graphics.rectangle("line", px + 40, input_y + 2, FP_W - 88, FP_ROW_H - 4, 2, 2)
-    Widgets.label(fp.path_str .. "_", px + 42, input_y, FP_W - 90, FP_ROW_H,
-                  Theme.text, Theme.font_small)
-    -- OK button
+    love.graphics.rectangle("fill", px + 36, input_y + 2, FP_W - 84, FP_ROW_H - 4, 2, 2)
+    Theme.set(fp.path_str ~= "" and Theme.border_focus or Theme.border)
+    love.graphics.rectangle("line", px + 36, input_y + 2, FP_W - 84, FP_ROW_H - 4, 2, 2)
+    local disp = fp.path_str ~= "" and (fp.path_str:match("[^/]+$") or fp.path_str) or "(none)"
+    Widgets.label(disp, px + 38, input_y, FP_W - 86, FP_ROW_H,
+                  fp.path_str ~= "" and Theme.text or Theme.text_dim, Theme.font_small)
     Widgets.button("OK", px + FP_W - 44, input_y + 2, 40, FP_ROW_H - 4, false, false, Theme.font_small)
 
-    -- File list
-    local list_y  = input_y + FP_ROW_H + 4
-    local list_h  = FP_H - (list_y - py) - 28
+    -- Directory listing
+    local list_y = input_y + FP_ROW_H + 4
+    local bot_y  = py + FP_H - 26
+    local list_h = bot_y - list_y - 2
     love.graphics.setScissor(px, list_y, FP_W - 12, list_h)
 
-    if #fp.files == 0 then
-        Widgets.label("No audio files found in save directory.", px + 8, list_y + 8,
-                      FP_W - 16, FP_ROW_H, Theme.text_dim, Theme.font_small)
+    -- Build display list: ".." entry first if not at root, then entries
+    local all_entries = {}
+    if fp.cwd ~= "" then
+        table.insert(all_entries, { name="..", is_dir=true, path=".." })
+    end
+    for _, e in ipairs(fp.entries) do table.insert(all_entries, e) end
+
+    if #all_entries == 0 then
+        Widgets.label("(empty)", px + 8, list_y + 8, FP_W - 16, FP_ROW_H,
+                      Theme.text_dim, Theme.font_small)
     else
         local cy = list_y - fp.scroll
-        for _, path in ipairs(fp.files) do
+        for _, entry in ipairs(all_entries) do
             if cy + FP_ROW_H >= list_y and cy < list_y + list_h then
-                local is_sel = (fp.path_str == path)
+                local is_sel = not entry.is_dir and fp.path_str == entry.path
                 if is_sel then
                     Theme.set({0.20, 0.35, 0.55, 1})
                     love.graphics.rectangle("fill", px + 2, cy, FP_W - 16, FP_ROW_H)
@@ -818,14 +1006,18 @@ function PatchGraph:_draw_file_picker(rect)
                     Theme.set(Theme.btn_hover)
                     love.graphics.rectangle("fill", px + 2, cy, FP_W - 16, FP_ROW_H)
                 end
-                -- Show just the filename, full path on hover
-                local display = path:match("[^/]+$") or path
-                Widgets.label(display, px + 6, cy, FP_W - 20, FP_ROW_H,
-                              is_sel and Theme.text or Theme.text_dim, Theme.font_small)
-                if hov then
-                    Widgets.label(path, px + 6, cy + FP_ROW_H, FP_W - 20, FP_ROW_H,
-                                  Theme.accent, Theme.font_small)
+                local lbl, col
+                if entry.path == ".." then
+                    lbl = "\xe2\x86\x90  .."
+                    col = Theme.text_dim
+                elseif entry.is_dir then
+                    lbl = "\xe2\x96\xb8 " .. entry.name .. "/"
+                    col = Theme.accent2
+                else
+                    lbl = entry.name
+                    col = is_sel and Theme.text or Theme.text_dim
                 end
+                Widgets.label(lbl, px + 8, cy, FP_W - 20, FP_ROW_H, col, Theme.font_small)
             end
             cy = cy + FP_ROW_H
         end
@@ -833,17 +1025,17 @@ function PatchGraph:_draw_file_picker(rect)
     love.graphics.setScissor()
 
     -- Scrollbar
-    local total_h = #fp.files * FP_ROW_H
+    local n_all = #fp.entries + (fp.cwd ~= "" and 1 or 0)
+    local total_h = n_all * FP_ROW_H
     if total_h > list_h then
         Widgets.scrollbar(px + FP_W - 12, list_y, 10, list_h, fp.scroll, total_h, list_h)
     end
 
-    -- Cancel button at bottom
-    local bot_y = py + FP_H - 26
+    -- Bottom bar
     Theme.set(Theme.border)
     love.graphics.line(px, bot_y, px + FP_W, bot_y)
-    Widgets.label("Tip: place .wav/.ogg files in the app save directory",
-                  px + 4, bot_y + 2, FP_W - 90, 22, Theme.text_dim, Theme.font_small)
+    local can_open = fp.path_str ~= ""
+    Widgets.button("Open", px + FP_W - 132, bot_y + 3, 62, 20, can_open, false, Theme.font_small)
     Widgets.button("Cancel", px + FP_W - 66, bot_y + 3, 62, 20, false, false, Theme.font_small)
 end
 
@@ -901,6 +1093,7 @@ function PatchGraph:_do_spawn(plugin_path, wx, wy)
 
     self.selected     = id
     self.browser_open = false
+    table.insert(self.node_order, id)
     return id
 end
 
@@ -932,6 +1125,12 @@ function PatchGraph:_delete_node(id)
     Registry.unregister(id)
     DAG.remove_node(id)
     if self.selected == id then self.selected = nil end
+    for i = #self.node_order, 1, -1 do
+        if self.node_order[i] == id then
+            table.remove(self.node_order, i)
+            break
+        end
+    end
 end
 
 function PatchGraph:_delete_edge(idx)
@@ -987,6 +1186,14 @@ function PatchGraph:_open_node_ctx(id, sx, sy)
                 end
             end
         end,
+    })
+    table.insert(items, {
+        label = "Load Preset\xe2\x80\xa6",
+        fn = function() self:_open_preset_picker(id, false) end,
+    })
+    table.insert(items, {
+        label = "Save as Preset\xe2\x80\xa6",
+        fn = function() self:_open_preset_picker(id, true) end,
     })
     table.insert(items, {
         label = "Cancel",
@@ -1073,57 +1280,75 @@ function PatchGraph:handle_event(ev, rect)
         local fp = self.file_picker
         local px = rect.x + math.floor((rect.w - FP_W) * 0.5)
         local py = rect.y + math.floor((rect.h - FP_H) * 0.5)
-        local input_y = py + 26
+        local input_y = py + 24 + FP_ROW_H + 2
         local list_y  = input_y + FP_ROW_H + 4
-        local list_h  = FP_H - (list_y - py) - 28
         local bot_y   = py + FP_H - 26
+        local list_h  = bot_y - list_y - 2
 
-        if ev.type == "text" then
-            fp.path_str = fp.path_str .. ev.text
-            return true
-        elseif ev.type == "key_down" then
+        local function nav_up()
+            if fp.cwd ~= "" then
+                fp.cwd     = fp.cwd:match("^(.*)/[^/]+$") or ""
+                fp.entries = scan_dir_entries(fp.cwd)
+                fp.scroll  = 0
+            end
+        end
+
+        if ev.type == "key_down" then
             local k = ev.key
-            if k == "backspace" then
-                fp.path_str = fp.path_str:sub(1, #fp.path_str - 1)
+            if k == "escape" then
+                self.file_picker = nil
             elseif k == "return" or k == "kpenter" then
                 self:_commit_file_picker()
-            elseif k == "escape" then
-                self.file_picker = nil
-            elseif k == "up" then
-                -- Navigate file list
-                for i, path in ipairs(fp.files) do
-                    if path == fp.path_str and i > 1 then
-                        fp.path_str = fp.files[i - 1]; break
-                    end
-                end
-            elseif k == "down" then
-                for i, path in ipairs(fp.files) do
-                    if path == fp.path_str and i < #fp.files then
-                        fp.path_str = fp.files[i + 1]; break
-                    end
-                end
+            elseif k == "backspace" then
+                nav_up()
             end
             return true
         elseif ev.type == "pointer_down" then
-            -- OK button
+            -- OK button (in file field bar)
             if Widgets.hit(ex, ey, px + FP_W - 44, input_y + 2, 40, FP_ROW_H - 4) then
                 self:_commit_file_picker(); return true
+            end
+            -- Open button (bottom bar)
+            if Widgets.hit(ex, ey, px + FP_W - 132, bot_y + 3, 62, 20) then
+                if fp.path_str ~= "" then self:_commit_file_picker() end
+                return true
             end
             -- Cancel button
             if Widgets.hit(ex, ey, px + FP_W - 66, bot_y + 3, 62, 20) then
                 self.file_picker = nil; return true
             end
-            -- File list clicks
+            -- Directory listing clicks
             if Widgets.hit(ex, ey, px + 2, list_y, FP_W - 16, list_h) then
+                local all_entries = {}
+                if fp.cwd ~= "" then
+                    table.insert(all_entries, { name="..", is_dir=true, path=".." })
+                end
+                for _, e in ipairs(fp.entries) do table.insert(all_entries, e) end
                 local cy = list_y - fp.scroll
-                for _, path in ipairs(fp.files) do
+                local now = love.timer.getTime()
+                for _, entry in ipairs(all_entries) do
                     if Widgets.hit(ex, ey, px + 2, cy, FP_W - 16, FP_ROW_H) then
-                        fp.path_str = path
-                        -- Double-click or single-click confirm
-                        if self._fp_last_click == path then
-                            self:_commit_file_picker()
+                        if entry.is_dir then
+                            if entry.path == ".." then
+                                nav_up()
+                            else
+                                fp.cwd     = entry.path
+                                fp.entries = scan_dir_entries(fp.cwd)
+                                fp.scroll  = 0
+                            end
+                            fp._last_click_path = nil
+                        else
+                            -- Single click: select; double-click: select + commit
+                            local is_dbl = fp._last_click_path == entry.path
+                                       and fp._last_click_time
+                                       and (now - fp._last_click_time) < 0.4
+                            fp.path_str = entry.path
+                            fp._last_click_path = entry.path
+                            fp._last_click_time = now
+                            if is_dbl then
+                                self:_commit_file_picker()
+                            end
                         end
-                        self._fp_last_click = path
                         return true
                     end
                     cy = cy + FP_ROW_H
@@ -1136,9 +1361,175 @@ function PatchGraph:handle_event(ev, rect)
             end
             return true
         elseif ev.type == "wheel" then
-            local total_h = #fp.files * FP_ROW_H
+            local n_all = #fp.entries + (fp.cwd ~= "" and 1 or 0)
+            local total_h = n_all * FP_ROW_H
             fp.scroll = math.max(0, math.min(math.max(0, total_h - list_h),
                                              fp.scroll - ev.dy * FP_ROW_H * 3))
+            return true
+        end
+        return true
+    end
+
+    -- Preset picker eats all input when open
+    if self.preset_picker then
+        local pp = self.preset_picker
+        local px = rect.x + math.floor((rect.w - PP_W) * 0.5)
+        local py = rect.y + math.floor((rect.h - PP_H) * 0.5)
+        local bot_y = py + PP_H - 26
+
+        local function revert_params()
+            local node = DAG.get_nodes()[pp.node_id]
+            if node and pp.saved_params then
+                for k, v in pairs(pp.saved_params) do
+                    DAG.set_param(pp.node_id, k, v)
+                    if node.params then node.params[k] = v end
+                end
+            end
+        end
+
+        if ev.type == "text" then
+            if pp.saving then
+                pp.save_name = pp.save_name .. ev.text
+            else
+                pp.filter = pp.filter .. ev.text
+                pp.scroll = 0
+            end
+            return true
+        elseif ev.type == "key_down" then
+            local k = ev.key
+            if k == "escape" then
+                if not pp.saving then revert_params() end
+                self.preset_picker = nil
+            elseif k == "backspace" then
+                if pp.saving then
+                    pp.save_name = pp.save_name:sub(1, #pp.save_name - 1)
+                else
+                    pp.filter = pp.filter:sub(1, #pp.filter - 1)
+                    pp.scroll = 0
+                end
+            elseif k == "return" or k == "kpenter" then
+                if pp.saving then
+                    if pp.save_name ~= "" then
+                        local save_node = DAG.get_nodes()[pp.node_id]
+                        if save_node and save_node.def and pp.save_name ~= "" then
+                            local _ppath = save_node.def._path or ""
+                            local _pparams = save_node.params or {}
+                            local _ok_s, _err_s = pcall(Preset.save, _ppath, pp.save_name, _pparams)
+                            if not _ok_s then
+                                print("[PatchGraph] preset save failed: " .. tostring(_err_s))
+                            end
+                            self.preset_picker = nil
+                        end
+                    end
+                end
+            end
+            return true
+        elseif ev.type == "pointer_down" then
+            if pp.saving then
+                -- Save button
+                local input_y = py + 30
+                if Widgets.hit(ex, ey, px + PP_W - 44, input_y + 2, 40, PP_ROW_H - 4) then
+                    if pp.save_name ~= "" then
+                        local save_node = DAG.get_nodes()[pp.node_id]
+                        if save_node and save_node.def and pp.save_name ~= "" then
+                            local _ppath = save_node.def._path or ""
+                            local _pparams = save_node.params or {}
+                            local _ok_s, _err_s = pcall(Preset.save, _ppath, pp.save_name, _pparams)
+                            if not _ok_s then
+                                print("[PatchGraph] preset save failed: " .. tostring(_err_s))
+                            end
+                            self.preset_picker = nil
+                        end
+                    end
+                    return true
+                end
+                -- Cancel button
+                if Widgets.hit(ex, ey, px + PP_W - 66, bot_y + 3, 62, 20) then
+                    self.preset_picker = nil
+                    return true
+                end
+            else
+                -- Load button
+                if Widgets.hit(ex, ey, px + PP_W - 132, bot_y + 3, 62, 20) then
+                    if pp.selected then self.preset_picker = nil end
+                    return true
+                end
+                -- Cancel button
+                if Widgets.hit(ex, ey, px + PP_W - 66, bot_y + 3, 62, 20) then
+                    revert_params()
+                    self.preset_picker = nil
+                    return true
+                end
+
+                -- Preset list clicks
+                local input_y = py + 26
+                local list_y  = input_y + PP_ROW_H + 4
+                local list_h  = bot_y - list_y - 2
+                if Widgets.hit(ex, ey, px + 2, list_y, PP_W - 16, list_h) then
+                    local filter_lc = pp.filter:lower()
+                    local factory_entries, user_entries = {}, {}
+                    for _, entry in ipairs(pp.presets) do
+                        local name_lc = entry.name:lower()
+                        if filter_lc == "" or name_lc:find(filter_lc, 1, true) then
+                            if entry.factory then
+                                factory_entries[#factory_entries + 1] = entry
+                            else
+                                user_entries[#user_entries + 1] = entry
+                            end
+                        end
+                    end
+                    local cy = list_y - pp.scroll
+                    local now = love.timer.getTime()
+                    local function check_section(entries)
+                        cy = cy + PP_ROW_H  -- skip header row
+                        for _, entry in ipairs(entries) do
+                            if Widgets.hit(ex, ey, px + 2, cy, PP_W - 16, PP_ROW_H) then
+                                local is_dbl = pp.selected == entry.path
+                                           and pp._last_click_time
+                                           and (now - pp._last_click_time) < 0.4
+                                pp.selected = entry.path
+                                pp._last_click_time = now
+                                local ok, data = pcall(Preset.load, entry.path)
+                                if ok and data then
+                                    Preset.apply(pp.node_id, data)
+                                end
+                                if is_dbl then
+                                    self.preset_picker = nil
+                                end
+                                return true
+                            end
+                            cy = cy + PP_ROW_H
+                        end
+                        return false
+                    end
+                    if #factory_entries > 0 then check_section(factory_entries) end
+                    if #user_entries > 0 then check_section(user_entries) end
+                    return true
+                end
+            end
+            -- Click outside panel: cancel (revert if loading)
+            if not Widgets.hit(ex, ey, px, py, PP_W, PP_H) then
+                if not pp.saving then revert_params() end
+                self.preset_picker = nil
+            end
+            return true
+        elseif ev.type == "wheel" then
+            if not pp.saving then
+                local filter_lc = pp.filter:lower()
+                local count = 0
+                for _, entry in ipairs(pp.presets) do
+                    local name_lc = entry.name:lower()
+                    if filter_lc == "" or name_lc:find(filter_lc, 1, true) then
+                        count = count + 1
+                    end
+                end
+                local input_y = py + 26
+                local list_y  = input_y + PP_ROW_H + 4
+                local list_h  = bot_y - list_y - 2
+                local total_h = count * PP_ROW_H
+                pp.scroll = math.max(0, math.min(math.max(0, total_h - list_h),
+                                                 pp.scroll - ev.dy * PP_ROW_H * 3))
+            end
             return true
         end
         return true
@@ -1172,6 +1563,9 @@ function PatchGraph:handle_event(ev, rect)
             local v = tonumber(ep.value_str)
             if v and p then
                 v = math.max(p.min, math.min(p.max, v))
+                if p.type == "int" or p.type == "bool" then
+                    v = math.floor(v + 0.5)
+                end
                 ep.value_str = string.format("%g", v)
                 DAG.set_param(ep.node_id, p.id, v)
                 local nd = DAG.get_nodes()[ep.node_id]
@@ -1221,6 +1615,14 @@ function PatchGraph:handle_event(ev, rect)
                 ep.dragging = true
                 ep.drag_ox  = ex - px2
                 ep.drag_oy  = ey - py2
+                return true
+            end
+
+            -- Value field: click to enter text
+            local val_y2 = py2 + PE_HDR_H + 4
+            if Widgets.hit(ex, ey, px2 + 8, val_y2, PE_W - 16, 22) then
+                ep.typing    = true
+                ep.value_str = string.format("%g", tonumber(ep.value_str) or 0)
                 return true
             end
 
@@ -1348,9 +1750,11 @@ function PatchGraph:handle_event(ev, rect)
                 self:_open_edge_ctx(ei, ex, ey)
                 return true
             end
-            -- Then node
-            for id, node in pairs(nodes) do
-                if hit_node(node, wx, wy) then
+            -- Then node (top-most first)
+            for i = #self.node_order, 1, -1 do
+                local id = self.node_order[i]
+                local node = nodes[id]
+                if node and hit_node(node, wx, wy) then
                     self:_open_node_ctx(id, ex, ey)
                     return true
                 end
@@ -1360,9 +1764,11 @@ function PatchGraph:handle_event(ev, rect)
             return true
         end
 
-        -- Left-click: outlet pin drag to start wire
-        for id, node in pairs(nodes) do
-            if id ~= DAG.master_id() then
+        -- Left-click: outlet pin drag to start wire (top-most first)
+        for i = #self.node_order, 1, -1 do
+            local id = self.node_order[i]
+            local node = nodes[id]
+            if node and id ~= DAG.master_id() then
                 local pi, pin = hit_outlet(node, wx, wy)
                 if pi then
                     local wx2, wy2 = outlet_pos(node, pi, #(node.def.outlets or {}))
@@ -1380,54 +1786,99 @@ function PatchGraph:handle_event(ev, rect)
             end
         end
 
-        -- Left-click: delete (×) button on node header
-        for id, node in pairs(nodes) do
-            if id ~= DAG.master_id() and hit_header(node, wx, wy) then
+        -- Left-click: delete (×) button on node header (top-most first)
+        for i = #self.node_order, 1, -1 do
+            local id = self.node_order[i]
+            local node = nodes[id]
+            if node and id ~= DAG.master_id() and hit_header(node, wx, wy) then
                 -- Check × button hit (right 20px of header)
-                if wx >= node.x + NODE_W - 20 then
+                if wx >= node.x + node_width(node.def) - 20 then
                     self:_delete_node(id)
                     return true
                 end
             end
         end
 
-        -- Left-click: param row -> start editing
-        for id, node in pairs(nodes) do
-            local pi = hit_param(node, wx, wy)
-            if pi then
-                local p   = node.def.params[pi]
-                local val = node.params and node.params[p.id]
-                if val == nil then val = p.default end
-                if p.type == "file" then
-                    self:_open_file_picker(id, pi, val)
-                else
-                    local fine = (p.max - p.min) / 100
-                    if p.type == "int" or p.type == "bool" then fine = 1 end
-                    -- Initial position: right of the node, clamped to screen
-                    local sw0, sh0 = love.graphics.getDimensions()
-                    local init_px = math.max(4, math.min(sw0 - PE_W - 4, ex + 12))
-                    local init_py = math.max(4, math.min(sh0 - PE_H - 4, ey - PE_HDR_H / 2))
-                    self.edit_param = {
-                        node_id   = id,
-                        param_idx = pi,
-                        value_str = string.format("%g", val),
-                        fine_step = fine,
-                        typing    = false,
-                        slider_drag = false,
-                        px        = init_px,
-                        py        = init_py,
-                        dragging  = false,
-                        drag_ox   = 0,
-                        drag_oy   = 0,
-                    }
+        -- Left-click: custom GUI panel event routing (top-most first)
+        for i = #self.node_order, 1, -1 do
+            local id2 = self.node_order[i]
+            local node2 = nodes[id2]
+            if node2 and node2.def and node2.def.gui then
+                local nw2    = node_width(node2.def)
+                local gui_h2 = node2.def.gui.height
+                local bx = node2.x
+                local by = node2.y + HDR_H
+                if wx >= bx and wx < bx + nw2 and wy >= by and wy < by + gui_h2 then
+                    bring_to_front(self.node_order, id2)
+                    -- Pointer is in the gui panel area
+                    if node2.def.gui.on_event then
+                        local gui_state = self.node_gui_state[id2] or {}
+                        self.node_gui_state[id2] = gui_state
+                        local panel_sx2 = node2.x * self.zoom + self.offset_x
+                        local panel_sy2 = (node2.y + HDR_H) * self.zoom + self.offset_y
+                        local panel_sw2 = nw2 * self.zoom
+                        local panel_sh2 = gui_h2 * self.zoom
+                        local rel_x = (wx - node2.x) * self.zoom
+                        local rel_y = (wy - node2.y - HDR_H) * self.zoom
+                        local gev = { type = ev.type, x = rel_x, y = rel_y,
+                                      button = ev.button, key = ev.key, dy = ev.dy }
+                        local mx3, my3 = love.mouse.getPosition()
+                        local gctx = build_gui_ctx(panel_sx2, panel_sy2, panel_sw2, panel_sh2, self.zoom, mx3, my3)
+                        local ok3, consumed = pcall(node2.def.gui.on_event, gctx, gui_state, gev)
+                        if ok3 and consumed then return true end
+                    end
+                    -- Even without on_event, absorb clicks in the gui area
+                    -- so they don't fall through to param editing
+                    return true
                 end
-                return true
             end
         end
 
-        -- Left-click: node header -> drag
-        for id, node in pairs(nodes) do
-            if hit_node(node, wx, wy) then
+        -- Left-click: param row -> start editing (top-most first)
+        for i = #self.node_order, 1, -1 do
+            local id = self.node_order[i]
+            local node = nodes[id]
+            if node then
+                local pi = hit_param(node, wx, wy)
+                if pi then
+                    bring_to_front(self.node_order, id)
+                    local p   = node.def.params[pi]
+                    local val = node.params and node.params[p.id]
+                    if val == nil then val = p.default end
+                    if p.type == "file" then
+                        self:_open_file_picker(id, pi, val)
+                    else
+                        local fine = (p.max - p.min) / 100
+                        if p.type == "int" or p.type == "bool" then fine = 1 end
+                        -- Initial position: right of the node, clamped to screen
+                        local sw0, sh0 = love.graphics.getDimensions()
+                        local init_px = math.max(4, math.min(sw0 - PE_W - 4, ex + 12))
+                        local init_py = math.max(4, math.min(sh0 - PE_H - 4, ey - PE_HDR_H / 2))
+                        self.edit_param = {
+                            node_id   = id,
+                            param_idx = pi,
+                            value_str = string.format("%g", val),
+                            fine_step = fine,
+                            typing    = false,
+                            slider_drag = false,
+                            px        = init_px,
+                            py        = init_py,
+                            dragging  = false,
+                            drag_ox   = 0,
+                            drag_oy   = 0,
+                        }
+                    end
+                    return true
+                end
+            end
+        end
+
+        -- Left-click: node body -> drag (top-most first)
+        for i = #self.node_order, 1, -1 do
+            local id = self.node_order[i]
+            local node = nodes[id]
+            if node and hit_node(node, wx, wy) then
+                bring_to_front(self.node_order, id)
                 self.selected  = id
                 self.drag_node = id
                 self.drag_ox   = wx - node.x
@@ -1455,18 +1906,22 @@ function PatchGraph:handle_event(ev, rect)
         self.hov_pin  = nil
         self.hov_edge = nil
 
-        -- Check pin hover
+        -- Check pin hover (top-most first)
         local found_pin = false
-        for id, node in pairs(nodes) do
-            local pi, pin = hit_outlet(node, wx, wy)
-            if pi then
-                self.hov_pin = { node_id=id, is_inlet=false, pin_id=pin.id }
-                found_pin = true; break
-            end
-            pi, pin = hit_inlet(node, wx, wy)
-            if pi then
-                self.hov_pin = { node_id=id, is_inlet=true, pin_id=pin.id }
-                found_pin = true; break
+        for i = #self.node_order, 1, -1 do
+            local id = self.node_order[i]
+            local node = nodes[id]
+            if node then
+                local pi, pin = hit_outlet(node, wx, wy)
+                if pi then
+                    self.hov_pin = { node_id=id, is_inlet=false, pin_id=pin.id }
+                    found_pin = true; break
+                end
+                pi, pin = hit_inlet(node, wx, wy)
+                if pi then
+                    self.hov_pin = { node_id=id, is_inlet=true, pin_id=pin.id }
+                    found_pin = true; break
+                end
             end
         end
 
@@ -1476,9 +1931,11 @@ function PatchGraph:handle_event(ev, rect)
             if ei then
                 self.hov_edge = ei
             else
-                -- Check node hover
-                for id, node in pairs(nodes) do
-                    if hit_node(node, wx, wy) then
+                -- Check node hover (top-most first)
+                for i = #self.node_order, 1, -1 do
+                    local id = self.node_order[i]
+                    local node = nodes[id]
+                    if node and hit_node(node, wx, wy) then
                         self.hov_node = id; break
                     end
                 end
@@ -1517,20 +1974,24 @@ function PatchGraph:handle_event(ev, rect)
             local wf = self.wire_from
             self.wire_from = nil
 
-            for id, node in pairs(nodes) do
-                local pi, pin = hit_inlet(node, wx, wy)
-                if pi and id ~= wf.node_id then
-                    -- Attempt connection
-                    local ok, err = pcall(DAG.add_edge,
-                        wf.node_id, wf.pin_id, id, pin.id)
-                    if ok then
-                        if self.on_add_edge then
-                            self.on_add_edge(wf.node_id, wf.pin_id, id, pin.id)
+            for i = #self.node_order, 1, -1 do
+                local id = self.node_order[i]
+                local node = nodes[id]
+                if node then
+                    local pi, pin = hit_inlet(node, wx, wy)
+                    if pi and id ~= wf.node_id then
+                        -- Attempt connection
+                        local ok, err = pcall(DAG.add_edge,
+                            wf.node_id, wf.pin_id, id, pin.id)
+                        if ok then
+                            if self.on_add_edge then
+                                self.on_add_edge(wf.node_id, wf.pin_id, id, pin.id)
+                            end
+                        else
+                            print("[PatchGraph] edge error: " .. tostring(err))
                         end
-                    else
-                        print("[PatchGraph] edge error: " .. tostring(err))
+                        break
                     end
-                    break
                 end
             end
             return true
@@ -1578,6 +2039,162 @@ function PatchGraph:handle_event(ev, rect)
     end
 
     return false
+end
+
+-- -------------------------
+-- Preset picker
+-- -------------------------
+
+function PatchGraph:_open_preset_picker(node_id, saving)
+    local node = DAG.get_nodes()[node_id]
+    if not node or not node.def then return end
+    local presets = Preset.list(node.def._path or "")
+    -- Save current params so we can revert on cancel
+    local saved = {}
+    if node.params then
+        for k, v in pairs(node.params) do saved[k] = v end
+    end
+    self.preset_picker = {
+        node_id      = node_id,
+        plugin_path  = node.def._path or "",
+        filter       = "",
+        scroll       = 0,
+        presets      = presets,
+        selected     = nil,
+        saved_params = saved,
+        saving       = saving,
+        save_name    = "",
+    }
+    self.ctx = nil
+end
+
+function PatchGraph:_draw_preset_picker(rect)
+    local pp = self.preset_picker
+    local px = rect.x + math.floor((rect.w - PP_W) * 0.5)
+    local py = rect.y + math.floor((rect.h - PP_H) * 0.5)
+
+    -- Dim overlay
+    love.graphics.setColor(0, 0, 0, 0.6)
+    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h)
+
+    -- Panel
+    Widgets.rect(px, py, PP_W, PP_H, Theme.bg_panel, Theme.border_focus, 4)
+
+    -- Title
+    local _slug = (pp.plugin_path or ""):match("([^/]+)%.lua$") or ""
+    local title = pp.saving and ("SAVE  \xe2\x80\x94  " .. _slug) or ("LOAD  \xe2\x80\x94  " .. _slug)
+    Widgets.label(title, px + 4, py + 2, PP_W - 8, 20,
+                  Theme.accent, Theme.font_small, "center")
+    Theme.set(Theme.border)
+    love.graphics.line(px, py + 22, px + PP_W, py + 22)
+
+    local bot_y = py + PP_H - 26
+    Theme.set(Theme.border)
+    love.graphics.line(px, bot_y, px + PP_W, bot_y)
+
+    if pp.saving then
+        -- Save name input
+        local input_y = py + 30
+        Widgets.label("Name:", px + 4, input_y, 38, PP_ROW_H, Theme.text_dim, Theme.font_small)
+        Theme.set({0.08, 0.08, 0.11, 1})
+        love.graphics.rectangle("fill", px + 44, input_y + 2, PP_W - 92, PP_ROW_H - 4, 2, 2)
+        Theme.set(Theme.border_focus)
+        love.graphics.rectangle("line", px + 44, input_y + 2, PP_W - 92, PP_ROW_H - 4, 2, 2)
+        Widgets.label(pp.save_name .. "_", px + 46, input_y, PP_W - 94, PP_ROW_H,
+                      Theme.text, Theme.font_small)
+
+        -- Save button
+        Widgets.button("Save", px + PP_W - 44, input_y + 2, 40, PP_ROW_H - 4, false, false, Theme.font_small)
+
+        -- Cancel button
+        Widgets.button("Cancel", px + PP_W - 66, bot_y + 3, 62, 20, false, false, Theme.font_small)
+    else
+        -- Filter input
+        local input_y = py + 26
+        Widgets.label("Filter:", px + 4, input_y, 42, PP_ROW_H, Theme.text_dim, Theme.font_small)
+        Theme.set({0.08, 0.08, 0.11, 1})
+        love.graphics.rectangle("fill", px + 48, input_y + 2, PP_W - 56, PP_ROW_H - 4, 2, 2)
+        Theme.set(Theme.border_focus)
+        love.graphics.rectangle("line", px + 48, input_y + 2, PP_W - 56, PP_ROW_H - 4, 2, 2)
+        Widgets.label(pp.filter .. "_", px + 50, input_y, PP_W - 58, PP_ROW_H,
+                      Theme.text, Theme.font_small)
+
+        -- Preset list
+        local list_y = input_y + PP_ROW_H + 4
+        local list_h = bot_y - list_y - 2
+        love.graphics.setScissor(px, list_y, PP_W - 12, list_h)
+
+        local filter_lc = pp.filter:lower()
+
+        -- Build display list with section headers
+        local factory_entries = {}
+        local user_entries    = {}
+        for _, entry in ipairs(pp.presets) do
+            local name_lc = entry.name:lower()
+            if filter_lc == "" or name_lc:find(filter_lc, 1, true) then
+                if entry.factory then
+                    factory_entries[#factory_entries + 1] = entry
+                else
+                    user_entries[#user_entries + 1] = entry
+                end
+            end
+        end
+
+        local cy = list_y - pp.scroll
+        local function draw_section(label_str, entries)
+            -- Section header
+            if cy + PP_ROW_H >= list_y and cy < list_y + list_h then
+                Theme.set({0.12, 0.14, 0.18, 1})
+                love.graphics.rectangle("fill", px + 2, cy, PP_W - 16, PP_ROW_H)
+                Widgets.label(label_str, px + 6, cy, PP_W - 20, PP_ROW_H,
+                              Theme.text_dim, Theme.font_small)
+            end
+            cy = cy + PP_ROW_H
+            for _, entry in ipairs(entries) do
+                if cy + PP_ROW_H >= list_y and cy < list_y + list_h then
+                    local is_sel = (pp.selected == entry.path)
+                    if is_sel then
+                        Theme.set({0.20, 0.35, 0.55, 1})
+                        love.graphics.rectangle("fill", px + 2, cy, PP_W - 16, PP_ROW_H)
+                    end
+                    local hov = Widgets.hit(love.mouse.getX(), love.mouse.getY(),
+                                            px + 2, cy, PP_W - 16, PP_ROW_H)
+                    if hov and not is_sel then
+                        Theme.set(Theme.btn_hover)
+                        love.graphics.rectangle("fill", px + 2, cy, PP_W - 16, PP_ROW_H)
+                    end
+                    Widgets.label(entry.name, px + 14, cy, PP_W - 28, PP_ROW_H,
+                                  is_sel and Theme.text or Theme.text_dim, Theme.font_small)
+                end
+                cy = cy + PP_ROW_H
+            end
+        end
+
+        if #factory_entries > 0 then
+            draw_section("[Factory]", factory_entries)
+        end
+        if #user_entries > 0 then
+            draw_section("[User]", user_entries)
+        end
+        if #factory_entries == 0 and #user_entries == 0 then
+            Widgets.label("No presets found.", px + 8, list_y + 8,
+                          PP_W - 16, PP_ROW_H, Theme.text_dim, Theme.font_small)
+        end
+
+        love.graphics.setScissor()
+
+        -- Scrollbar
+        local n_headers = (#factory_entries > 0 and 1 or 0) + (#user_entries > 0 and 1 or 0)
+        local total_rows = #factory_entries + #user_entries + n_headers
+        local total_h = total_rows * PP_ROW_H
+        if total_h > list_h then
+            Widgets.scrollbar(px + PP_W - 12, list_y, 10, list_h, pp.scroll, total_h, list_h)
+        end
+
+        local can_load = pp.selected ~= nil
+        Widgets.button("Load", px + PP_W - 132, bot_y + 3, 62, 20, can_load, false, Theme.font_small)
+        Widgets.button("Cancel", px + PP_W - 66, bot_y + 3, 62, 20, false, false, Theme.font_small)
+    end
 end
 
 return PatchGraph

@@ -1,0 +1,15 @@
+return {
+  plugin = "plugins/generators/sine_osc.lua",
+  name   = "Slow Swell",
+  author = "Piper",
+  params = {
+    freq    = 440,
+    amp     = 0.5,
+    pan     = 0,
+    tune    = 0,
+    attack  = 2.0,
+    decay   = 0.2,
+    sustain = 0.8,
+    release = 4.0,
+  },
+}

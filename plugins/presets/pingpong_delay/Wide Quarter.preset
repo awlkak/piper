@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/pingpong_delay.lua",
+  name   = "Wide Quarter",
+  author = "Piper",
+  params = {
+    time     = 375,
+    feedback = 0.55,
+    offset   = 0.75,
+    damp     = 0.4,
+    wet      = 0.4,
+  },
+}

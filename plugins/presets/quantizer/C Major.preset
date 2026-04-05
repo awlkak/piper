@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/quantizer.lua",
+  name   = "C Major",
+  author = "Piper",
+  params = {
+    scale  = 1,
+    root   = 0,
+    octave = 4,
+    custom = 2741,
+  },
+}

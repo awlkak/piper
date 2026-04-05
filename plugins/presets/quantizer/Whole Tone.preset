@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/quantizer.lua",
+  name   = "Whole Tone",
+  author = "Piper",
+  params = {
+    scale  = 5,
+    root   = 0,
+    octave = 4,
+    custom = 2741,
+  },
+}

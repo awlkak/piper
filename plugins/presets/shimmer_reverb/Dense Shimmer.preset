@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/shimmer_reverb.lua",
+  name   = "Dense Shimmer",
+  author = "Piper",
+  params = {
+    size           = 0.9,
+    damp           = 0.2,
+    pitch_shift    = 2.0,
+    shimmer_amount = 0.7,
+    mix            = 0.5,
+    predelay       = 20,
+  },
+}

@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/clock_lfo.lua",
+  name   = "Eighth Saw",
+  author = "Piper",
+  params = {
+    period_beats = 0.5,
+    depth        = 1.0,
+    shape        = 3,
+    offset       = 0,
+    phase_offset = 0,
+  },
+}

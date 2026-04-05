@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/shimmer_reverb.lua",
+  name   = "Ethereal Octave",
+  author = "Piper",
+  params = {
+    size           = 0.7,
+    damp           = 0.4,
+    pitch_shift    = 2.0,
+    shimmer_amount = 0.4,
+    mix            = 0.35,
+    predelay       = 10,
+  },
+}

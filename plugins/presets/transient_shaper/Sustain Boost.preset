@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/transient_shaper.lua",
+  name   = "Sustain Boost",
+  author = "Piper",
+  params = {
+    attack  = -2,
+    sustain = 6,
+    speed   = 0.5,
+  },
+}

@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/delay.lua",
+  name   = "Slapback",
+  author = "Piper",
+  params = {
+    time     = 60,
+    feedback = 0.1,
+    wet      = 0.4,
+  },
+}

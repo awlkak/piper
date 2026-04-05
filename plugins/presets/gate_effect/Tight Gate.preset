@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/gate_effect.lua",
+  name   = "Tight Gate",
+  author = "Piper",
+  params = {
+    threshold = -40,
+    attack    = 1,
+    hold      = 20,
+    release   = 80,
+    range     = -60,
+  },
+}

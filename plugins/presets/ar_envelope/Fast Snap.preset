@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/control/ar_envelope.lua",
+  name   = "Fast Snap",
+  author = "Piper",
+  params = {
+    attack  = 0.002,
+    release = 0.1,
+    curve   = 0.8,
+  },
+}

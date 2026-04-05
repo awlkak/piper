@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/phaser.lua",
+  name   = "Classic Sweep",
+  author = "Piper",
+  params = {
+    rate     = 0.4,
+    depth    = 0.8,
+    center   = 1000,
+    feedback = 0.5,
+    mix      = 0.5,
+  },
+}

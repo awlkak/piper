@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/clock_divider.lua",
+  name   = "Polyrhythm",
+  author = "Piper",
+  params = {
+    div1 = 2,
+    div2 = 3,
+    div3 = 5,
+    div4 = 7,
+  },
+}

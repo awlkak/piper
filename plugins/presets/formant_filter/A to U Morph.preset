@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/formant_filter.lua",
+  name   = "A to U Morph",
+  author = "Piper",
+  params = {
+    morph = 2,
+    gain  = 1.2,
+    mix   = 0.8,
+  },
+}

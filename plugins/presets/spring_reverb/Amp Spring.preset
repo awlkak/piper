@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/spring_reverb.lua",
+  name   = "Amp Spring",
+  author = "Piper",
+  params = {
+    tension = 0.6,
+    length  = 0.5,
+    damp    = 0.4,
+    mix     = 0.35,
+    drip    = 0.4,
+  },
+}

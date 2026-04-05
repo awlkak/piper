@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/wavefolder.lua",
+  name   = "Subtle Warm",
+  author = "Piper",
+  params = {
+    drive  = 1.5,
+    stages = 1,
+    mix    = 0.4,
+  },
+}

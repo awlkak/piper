@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/chorus.lua",
+  name   = "Aquatic",
+  author = "Piper",
+  params = {
+    rate   = 0.15,
+    depth  = 18,
+    delay  = 25,
+    mix    = 0.7,
+    spread = 1.0,
+  },
+}

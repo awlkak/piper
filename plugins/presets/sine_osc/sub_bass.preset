@@ -1,0 +1,15 @@
+return {
+  plugin = "plugins/generators/sine_osc.lua",
+  name   = "Sub Bass",
+  author = "Piper",
+  params = {
+    freq    = 55,
+    amp     = 0.8,
+    pan     = 0,
+    tune    = 0,
+    attack  = 0.01,
+    decay   = 0.1,
+    sustain = 0.9,
+    release = 0.3,
+  },
+}

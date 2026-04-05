@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/limiter.lua",
+  name   = "Fast Limit",
+  author = "Piper",
+  params = {
+    ceiling   = -0.5,
+    release   = 30,
+    lookahead = 2,
+  },
+}

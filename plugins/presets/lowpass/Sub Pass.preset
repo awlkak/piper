@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/lowpass.lua",
+  name   = "Sub Pass",
+  author = "Piper",
+  params = {
+    cutoff = 120,
+    res    = 0.7,
+  },
+}

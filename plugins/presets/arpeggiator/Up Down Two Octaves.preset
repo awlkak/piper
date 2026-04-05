@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/arpeggiator.lua",
+  name   = "Up Down Two Octaves",
+  author = "Piper",
+  params = {
+    mode     = 2,
+    octaves  = 2,
+    gate_len = 0.5,
+    latch    = 0,
+  },
+}

@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/gain.lua",
+  name   = "Boost 6dB",
+  author = "Piper",
+  params = {
+    gain = 6,
+    pan  = 0,
+  },
+}

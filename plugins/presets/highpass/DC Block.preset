@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/highpass.lua",
+  name   = "DC Block",
+  author = "Piper",
+  params = {
+    cutoff = 20,
+    res    = 0.5,
+  },
+}

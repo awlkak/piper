@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bitcrusher.lua",
+  name   = "4-bit Crunch",
+  author = "Piper",
+  params = {
+    bits = 4,
+    rate = 1,
+    mix  = 1.0,
+  },
+}

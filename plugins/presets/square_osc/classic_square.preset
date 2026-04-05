@@ -1,0 +1,15 @@
+return {
+  plugin = "plugins/generators/square_osc.lua",
+  name   = "Classic Square",
+  author = "Piper",
+  params = {
+    freq    = 440,
+    amp     = 0.5,
+    pan     = 0,
+    duty    = 0.5,
+    attack  = 0.005,
+    decay   = 0.15,
+    sustain = 0.7,
+    release = 0.3,
+  },
+}

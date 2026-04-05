@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/tremolo.lua",
+  name   = "Slow Pulse",
+  author = "Piper",
+  params = {
+    rate         = 1.0,
+    depth        = 0.5,
+    shape        = 0,
+    stereo       = 0,
+    phase_offset = 0.25,
+  },
+}

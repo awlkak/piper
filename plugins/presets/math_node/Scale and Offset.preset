@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/math_node.lua",
+  name   = "Scale and Offset",
+  author = "Piper",
+  params = {
+    op    = 8,
+    a     = 0.5,
+    b     = 0.5,
+    const = 0.0,
+  },
+}

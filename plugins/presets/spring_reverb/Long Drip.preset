@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/spring_reverb.lua",
+  name   = "Long Drip",
+  author = "Piper",
+  params = {
+    tension = 0.4,
+    length  = 0.9,
+    damp    = 0.2,
+    mix     = 0.4,
+    drip    = 0.7,
+  },
+}

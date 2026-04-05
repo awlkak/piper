@@ -1,0 +1,13 @@
+return {
+  plugin = "plugins/effects/diffusion_reverb.lua",
+  name   = "Concert Hall",
+  author = "Piper",
+  params = {
+    size      = 0.85,
+    damp      = 0.4,
+    diffusion = 0.9,
+    predelay  = 25,
+    mix       = 0.35,
+    width     = 1.0,
+  },
+}

@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/quantizer.lua",
+  name   = "Chromatic",
+  author = "Piper",
+  params = {
+    scale  = 0,
+    root   = 0,
+    octave = 4,
+    custom = 4095,
+  },
+}

@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/flanger.lua",
+  name   = "Resonant Flange",
+  author = "Piper",
+  params = {
+    rate     = 0.5,
+    depth    = 2.0,
+    delay    = 0.3,
+    feedback = 0.88,
+    mix      = 0.5,
+  },
+}

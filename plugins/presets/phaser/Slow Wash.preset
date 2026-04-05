@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/phaser.lua",
+  name   = "Slow Wash",
+  author = "Piper",
+  params = {
+    rate     = 0.1,
+    depth    = 1.0,
+    center   = 600,
+    feedback = 0.4,
+    mix      = 0.5,
+  },
+}

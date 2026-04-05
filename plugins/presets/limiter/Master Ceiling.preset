@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/limiter.lua",
+  name   = "Master Ceiling",
+  author = "Piper",
+  params = {
+    ceiling   = -0.3,
+    release   = 100,
+    lookahead = 5,
+  },
+}

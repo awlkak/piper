@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/ladder_filter.lua",
+  name   = "Moog Dark",
+  author = "Piper",
+  params = {
+    cutoff    = 600,
+    resonance = 0.3,
+    drive     = 1.0,
+    mix       = 1.0,
+  },
+}

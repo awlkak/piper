@@ -1,0 +1,8 @@
+return {
+  plugin = "plugins/control/send_receive.lua",
+  name   = "Channel 2",
+  author = "Piper",
+  params = {
+    channel = "send2",
+  },
+}

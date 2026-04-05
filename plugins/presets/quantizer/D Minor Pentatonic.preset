@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/quantizer.lua",
+  name   = "D Minor Pentatonic",
+  author = "Piper",
+  params = {
+    scale  = 4,
+    root   = 2,
+    octave = 4,
+    custom = 2741,
+  },
+}

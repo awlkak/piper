@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/notch.lua",
+  name   = "60Hz Hum",
+  author = "Piper",
+  params = {
+    cutoff = 60,
+    q      = 10.0,
+    mix    = 1.0,
+  },
+}

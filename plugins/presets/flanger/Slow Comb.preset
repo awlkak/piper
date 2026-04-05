@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/flanger.lua",
+  name   = "Slow Comb",
+  author = "Piper",
+  params = {
+    rate     = 0.08,
+    depth    = 4.0,
+    delay    = 1.0,
+    feedback = 0.5,
+    mix      = 0.5,
+  },
+}

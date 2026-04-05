@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/bandpass.lua",
+  name   = "Vocal Formant",
+  author = "Piper",
+  params = {
+    cutoff = 2400,
+    q      = 8.0,
+    mix    = 1.0,
+  },
+}

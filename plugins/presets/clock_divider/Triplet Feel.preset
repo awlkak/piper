@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/clock_divider.lua",
+  name   = "Triplet Feel",
+  author = "Piper",
+  params = {
+    div1 = 1,
+    div2 = 3,
+    div3 = 6,
+    div4 = 12,
+  },
+}

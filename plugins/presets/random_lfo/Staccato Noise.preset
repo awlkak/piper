@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/random_lfo.lua",
+  name   = "Staccato Noise",
+  author = "Piper",
+  params = {
+    rate   = 8.0,
+    depth  = 1.0,
+    offset = 0,
+    smooth = 0.1,
+    seed   = 0,
+  },
+}

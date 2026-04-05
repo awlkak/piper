@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/stereo_widener.lua",
+  name   = "Stereo Spread",
+  author = "Piper",
+  params = {
+    width     = 1.5,
+    bass_mono = 0,
+    bass_freq = 200,
+  },
+}

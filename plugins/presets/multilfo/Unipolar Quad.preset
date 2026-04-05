@@ -1,0 +1,14 @@
+return {
+  plugin = "plugins/control/multilfo.lua",
+  name   = "Unipolar Quad",
+  author = "Piper",
+  params = {
+    rate   = 1.0,
+    depth  = 0.5,
+    shape  = 0,
+    phase2 = 0.25,
+    phase3 = 0.5,
+    phase4 = 0.75,
+    offset = 0.5,
+  },
+}

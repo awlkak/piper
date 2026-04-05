@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/math_node.lua",
+  name   = "Multiply",
+  author = "Piper",
+  params = {
+    op    = 2,
+    a     = 1.0,
+    b     = 0.0,
+    const = 1.0,
+  },
+}

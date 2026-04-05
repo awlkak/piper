@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/clock_divider.lua",
+  name   = "Powers of Two",
+  author = "Piper",
+  params = {
+    div1 = 2,
+    div2 = 4,
+    div3 = 8,
+    div4 = 16,
+  },
+}

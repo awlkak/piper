@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/gate_effect.lua",
+  name   = "Snare Gate",
+  author = "Piper",
+  params = {
+    threshold = -30,
+    attack    = 0.5,
+    hold      = 100,
+    release   = 200,
+    range     = -60,
+  },
+}

@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/reverb.lua",
+  name   = "Hall",
+  author = "Piper",
+  params = {
+    room     = 0.8,
+    damp     = 0.4,
+    width    = 0.9,
+    mix      = 0.35,
+    predelay = 20,
+  },
+}

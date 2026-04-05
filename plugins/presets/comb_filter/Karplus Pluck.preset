@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/comb_filter.lua",
+  name   = "Karplus Pluck",
+  author = "Piper",
+  params = {
+    time     = 2,
+    feedback = 0.92,
+    damp     = 0.6,
+    mix      = 0.8,
+  },
+}

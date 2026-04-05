@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/envelope.lua",
+  name   = "Pad",
+  author = "Piper",
+  params = {
+    attack  = 0.5,
+    decay   = 0.3,
+    sustain = 0.8,
+    release = 1.5,
+  },
+}

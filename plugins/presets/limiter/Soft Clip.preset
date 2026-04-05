@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/limiter.lua",
+  name   = "Soft Clip",
+  author = "Piper",
+  params = {
+    ceiling   = -3,
+    release   = 200,
+    lookahead = 3,
+  },
+}

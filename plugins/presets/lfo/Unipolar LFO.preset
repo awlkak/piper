@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/lfo.lua",
+  name   = "Unipolar LFO",
+  author = "Piper",
+  params = {
+    rate   = 1.0,
+    depth  = 0.5,
+    shape  = 0,
+    offset = 0.5,
+  },
+}

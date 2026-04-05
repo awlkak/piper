@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/transient_shaper.lua",
+  name   = "Punch",
+  author = "Piper",
+  params = {
+    attack  = 10,
+    sustain = 0,
+    speed   = 0.8,
+  },
+}

@@ -23,6 +23,87 @@ return {
         { id="release", label="Release (s)", min=0.001, max=10, default=0.3,   type="float" },
     },
 
+    gui = {
+        height = 60,
+        draw = function(ctx, state)
+            local a = state.attack  or 0.01
+            local d = state.decay   or 0.1
+            local s = state.sustain or 0.7
+            local r = state.release or 0.3
+            local T = ctx.theme
+
+            ctx.rect(0, 0, ctx.w, ctx.h, {0.07,0.07,0.10,1}, nil)
+
+            -- Compute segment widths proportionally
+            -- A + D + sustain_hold + R = full width
+            -- sustain_hold is fixed at 25% of width; A/D/R share the remaining 75%
+            local total_time = a + d + r
+            local seg_w = ctx.w * 0.75  -- for A+D+R
+            local sus_w = ctx.w * 0.25  -- for sustain hold
+            local aw = seg_w * (a / math.max(total_time, 0.001))
+            local dw = seg_w * (d / math.max(total_time, 0.001))
+            local rw = seg_w * (r / math.max(total_time, 0.001))
+
+            local pad = 4
+            local top    = pad
+            local bottom = ctx.h - pad
+            local height = bottom - top
+            local sus_y  = top + height * (1 - s)
+
+            -- Build ADSR polyline
+            local x0 = 0
+            local x1 = x0 + aw
+            local x2 = x1 + dw
+            local x3 = x2 + sus_w
+            local x4 = x3 + rw
+
+            local pts = {
+                x0, bottom,
+                x1, top,
+                x2, sus_y,
+                x3, sus_y,
+                x4, bottom,
+            }
+
+            -- Fill (semi-transparent)
+            -- draw as filled polygon using rects isn't possible cleanly, so just use plot
+            ctx.plot(pts, {0.90, 0.65, 0.10, 0.25}, 6)
+            ctx.plot(pts, T.accent, 1.5)
+
+            -- Playhead dot if active
+            if state.env_val and state.env_state and state.env_state ~= 0 then
+                local ex2, ey2
+                local es = state.env_state
+                local ev2 = state.env_val or 0
+                -- Approximate x position
+                if es == 1 then      -- ATTACK
+                    ex2 = x0 + aw * ev2
+                    ey2 = top + height * (1 - ev2)
+                elseif es == 2 then  -- DECAY
+                    local t = (ev2 - s) / math.max(1 - s, 0.001)
+                    ex2 = x1 + dw * (1 - t)
+                    ey2 = top + height * (1 - ev2)
+                elseif es == 3 then  -- SUSTAIN
+                    ex2 = x2 + sus_w * 0.5
+                    ey2 = sus_y
+                elseif es == 4 then  -- RELEASE
+                    local t = ev2 / math.max(s, 0.001)
+                    ex2 = x3 + rw * (1 - t)
+                    ey2 = top + height * (1 - ev2)
+                end
+                if ex2 then
+                    ctx.circle(ex2, ey2, 3, "fill", T.accent)
+                end
+            end
+
+            -- Segment labels
+            ctx.label("A", x0, ctx.h-12, aw, 12, {1,1,1,0.4}, T.font_small, "center")
+            ctx.label("D", x1, ctx.h-12, dw, 12, {1,1,1,0.4}, T.font_small, "center")
+            ctx.label("S", x2, ctx.h-12, sus_w, 12, {1,1,1,0.4}, T.font_small, "center")
+            ctx.label("R", x3, ctx.h-12, rw, 12, {1,1,1,0.4}, T.font_small, "center")
+        end,
+    },
+
     new = function(self, args)
         local inst     = {}
         local sr       = piper.SAMPLE_RATE
@@ -142,6 +223,17 @@ return {
             state   = IDLE
             env_val = 0.0
             sample  = 0
+        end
+
+        function inst:get_ui_state()
+            return {
+                attack    = attack,
+                decay     = decay,
+                sustain   = sustain,
+                release   = release,
+                env_val   = env_val,
+                env_state = state,
+            }
         end
 
         function inst:destroy() end

@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/multimode_filter.lua",
+  name   = "Band Pass Mode",
+  author = "Piper",
+  params = {
+    cutoff    = 800,
+    resonance = 1.5,
+    mode      = 1,
+    mix       = 1.0,
+  },
+}

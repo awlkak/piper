@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/ladder_filter.lua",
+  name   = "Driven Ladder",
+  author = "Piper",
+  params = {
+    cutoff    = 1200,
+    resonance = 0.6,
+    drive     = 3.0,
+    mix       = 1.0,
+  },
+}

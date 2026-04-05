@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/transient_shaper.lua",
+  name   = "Snap Attack",
+  author = "Piper",
+  params = {
+    attack  = 8,
+    sustain = -4,
+    speed   = 0.7,
+  },
+}

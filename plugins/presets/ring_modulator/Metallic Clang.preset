@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/ring_modulator.lua",
+  name   = "Metallic Clang",
+  author = "Piper",
+  params = {
+    freq  = 237,
+    shape = 2,
+    depth = 1.0,
+    mode  = 1,
+    mix   = 1.0,
+  },
+}

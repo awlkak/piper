@@ -1,0 +1,17 @@
+return {
+  plugin = "plugins/control/mseg_envelope.lua",
+  name   = "Staircase",
+  author = "Piper",
+  params = {
+    loop_start = 3,
+    loop_end   = 5,
+    loop       = 0,
+    l1 = 0.8, t1 = 0.05,
+    l2 = 0.6, t2 = 0.05,
+    l3 = 0.4, t3 = 0.05,
+    l4 = 0.2, t4 = 0.05,
+    l5 = 0,   t5 = 0.2,
+    l6 = 0,   t6 = 0,
+    l7 = 0,   t7 = 0,
+  },
+}

@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/tremolo.lua",
+  name   = "Chopper",
+  author = "Piper",
+  params = {
+    rate         = 8.0,
+    depth        = 1.0,
+    shape        = 2,
+    stereo       = 0,
+    phase_offset = 0.25,
+  },
+}

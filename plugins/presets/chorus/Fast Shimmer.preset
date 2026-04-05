@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/chorus.lua",
+  name   = "Fast Shimmer",
+  author = "Piper",
+  params = {
+    rate   = 3.0,
+    depth  = 5,
+    delay  = 10,
+    mix    = 0.45,
+    spread = 0.7,
+  },
+}

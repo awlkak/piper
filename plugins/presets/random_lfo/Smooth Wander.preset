@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/random_lfo.lua",
+  name   = "Smooth Wander",
+  author = "Piper",
+  params = {
+    rate   = 0.5,
+    depth  = 0.6,
+    offset = 0,
+    smooth = 0.9,
+    seed   = 0,
+  },
+}

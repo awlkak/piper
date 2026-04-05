@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/random_lfo.lua",
+  name   = "Slow Drift",
+  author = "Piper",
+  params = {
+    rate   = 0.3,
+    depth  = 0.8,
+    offset = 0,
+    smooth = 0.7,
+    seed   = 0,
+  },
+}

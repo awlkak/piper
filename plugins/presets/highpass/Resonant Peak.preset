@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/highpass.lua",
+  name   = "Resonant Peak",
+  author = "Piper",
+  params = {
+    cutoff = 2000,
+    res    = 5.0,
+  },
+}

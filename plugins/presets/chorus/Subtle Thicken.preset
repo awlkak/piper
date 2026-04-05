@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/chorus.lua",
+  name   = "Subtle Thicken",
+  author = "Piper",
+  params = {
+    rate   = 0.2,
+    depth  = 3,
+    delay  = 8,
+    mix    = 0.3,
+    spread = 0.5,
+  },
+}

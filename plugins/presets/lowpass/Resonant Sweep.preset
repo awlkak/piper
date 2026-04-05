@@ -1,0 +1,9 @@
+return {
+  plugin = "plugins/effects/lowpass.lua",
+  name   = "Resonant Sweep",
+  author = "Piper",
+  params = {
+    cutoff = 1200,
+    res    = 4.0,
+  },
+}

@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/tape_saturation.lua",
+  name   = "Biased Distort",
+  author = "Piper",
+  params = {
+    drive = 7.0,
+    bias  = 0.5,
+    tone  = 0.6,
+    mix   = 1.0,
+  },
+}

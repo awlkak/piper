@@ -1,0 +1,16 @@
+return {
+  plugin = "plugins/effects/tape_delay.lua",
+  name   = "Dirty Slapback",
+  author = "Piper",
+  params = {
+    time          = 70,
+    feedback      = 0.2,
+    wow_rate      = 0.4,
+    wow_depth     = 3,
+    flutter_rate  = 12,
+    flutter_depth = 1.5,
+    saturation    = 3.0,
+    damp          = 0.3,
+    wet           = 0.45,
+  },
+}

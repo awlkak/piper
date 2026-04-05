@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/tremolo.lua",
+  name   = "Stereo Trem",
+  author = "Piper",
+  params = {
+    rate         = 4.0,
+    depth        = 0.8,
+    shape        = 0,
+    stereo       = 1,
+    phase_offset = 0.5,
+  },
+}

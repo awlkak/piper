@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/ring_modulator.lua",
+  name   = "Classic AM",
+  author = "Piper",
+  params = {
+    freq  = 440,
+    shape = 0,
+    depth = 1.0,
+    mode  = 0,
+    mix   = 1.0,
+  },
+}

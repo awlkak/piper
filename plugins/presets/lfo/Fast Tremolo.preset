@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/lfo.lua",
+  name   = "Fast Tremolo",
+  author = "Piper",
+  params = {
+    rate   = 6.0,
+    depth  = 0.8,
+    shape  = 0,
+    offset = 0,
+  },
+}

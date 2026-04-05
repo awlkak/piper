@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/control/step_sequencer.lua",
+  name   = "8 Step Up",
+  author = "Piper",
+  params = {
+    steps     = 8,
+    direction = 0,
+    gate_len  = 0.5,
+    n1 = 60, n2 = 62, n3 = 64, n4 = 65,
+    n5 = 67, n6 = 69, n7 = 71, n8 = 72,
+  },
+}

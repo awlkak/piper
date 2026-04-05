@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/tape_saturation.lua",
+  name   = "Hot Tape",
+  author = "Piper",
+  params = {
+    drive = 5.0,
+    bias  = 0.1,
+    tone  = 0.7,
+    mix   = 1.0,
+  },
+}

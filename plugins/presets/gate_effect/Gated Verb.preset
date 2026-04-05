@@ -1,0 +1,12 @@
+return {
+  plugin = "plugins/effects/gate_effect.lua",
+  name   = "Gated Verb",
+  author = "Piper",
+  params = {
+    threshold = -35,
+    attack    = 2,
+    hold      = 300,
+    release   = 30,
+    range     = -60,
+  },
+}

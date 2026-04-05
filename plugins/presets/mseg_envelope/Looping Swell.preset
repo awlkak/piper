@@ -1,0 +1,17 @@
+return {
+  plugin = "plugins/control/mseg_envelope.lua",
+  name   = "Looping Swell",
+  author = "Piper",
+  params = {
+    loop_start = 1,
+    loop_end   = 4,
+    loop       = 1,
+    l1 = 0,   t1 = 0.5,
+    l2 = 1,   t2 = 0.5,
+    l3 = 0.5, t3 = 0.5,
+    l4 = 0,   t4 = 0.5,
+    l5 = 0,   t5 = 0,
+    l6 = 0,   t6 = 0,
+    l7 = 0,   t7 = 0,
+  },
+}

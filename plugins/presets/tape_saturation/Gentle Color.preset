@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/effects/tape_saturation.lua",
+  name   = "Gentle Color",
+  author = "Piper",
+  params = {
+    drive = 1.5,
+    bias  = 0,
+    tone  = 0.3,
+    mix   = 0.5,
+  },
+}

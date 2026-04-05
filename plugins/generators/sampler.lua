@@ -24,6 +24,37 @@ return {
         { id="loop",    label="Loop",        min=0, max=1,   default=0,    type="bool"  },
     },
 
+    gui = {
+        height = 56,
+        draw = function(ctx, state)
+            -- Background
+            ctx.rect(0, 0, ctx.w, ctx.h, {0.05, 0.05, 0.08, 1}, {0.15, 0.15, 0.20, 1})
+            if state.waveform and #state.waveform >= 2 then
+                -- Draw waveform center line
+                ctx.line(0, ctx.h * 0.5, ctx.w, ctx.h * 0.5,
+                         {0.15, 0.15, 0.20, 1}, 1)
+                -- Build polyline points
+                local pts = {}
+                local n = #state.waveform
+                for i, s in ipairs(state.waveform) do
+                    local px = (i - 1) / (n - 1) * ctx.w
+                    local py = ctx.h * 0.5 - s * ctx.h * 0.45
+                    pts[#pts + 1] = px
+                    pts[#pts + 1] = py
+                end
+                ctx.plot(pts, {0.30, 0.70, 0.90, 1}, 1)
+                -- Playhead
+                if state.playhead_norm then
+                    local phx = state.playhead_norm * ctx.w
+                    ctx.line(phx, 0, phx, ctx.h, {0.90, 0.65, 0.10, 0.8}, 1)
+                end
+            else
+                ctx.label("no sample loaded", 0, 0, ctx.w, ctx.h,
+                          ctx.theme.text_dim, ctx.theme.font_small, "center")
+            end
+        end,
+    },
+
     new = function(self, args)
         local inst   = {}
         local sr     = piper.SAMPLE_RATE
@@ -40,9 +71,12 @@ return {
         local playhead     = 0.0
         local pitch_ratio  = 1.0
 
+        local waveform_cache = nil   -- downsampled mono float array (max 512 pts)
+        local sample_total   = 0
+
         local function load_file(path)
             if not path or path == "" then return end
-            local ok, sd = pcall(love.sound.newSoundData, path)
+            local ok, sd = pcall(piper.load_sound, path)
             if not ok then
                 print("[Sampler] could not load: " .. tostring(path))
                 return
@@ -51,6 +85,26 @@ return {
             sample_sr    = sd:getSampleRate()
             local ch     = sd:getChannelCount()
             sample_count = math.floor(sd:getSampleCount() / ch)
+
+            -- Build downsampled waveform for display (max 512 points, mono)
+            local WAVE_PTS = 512
+            local pts = {}
+            local ch2 = sd:getChannelCount()
+            local frames2 = math.floor(sd:getSampleCount() / ch2)
+            local step2 = math.max(1, math.floor(frames2 / WAVE_PTS))
+            local i2 = 0
+            while i2 < frames2 and #pts < WAVE_PTS do
+                local s2
+                if ch2 == 2 then
+                    s2 = (sd:getSample(i2 * 2) + sd:getSample(i2 * 2 + 1)) * 0.5
+                else
+                    s2 = sd:getSample(i2)
+                end
+                pts[#pts + 1] = s2
+                i2 = i2 + step2
+            end
+            waveform_cache = pts
+            sample_total   = frames2
         end
 
         local function update_pitch(note)
@@ -144,6 +198,15 @@ return {
 
                 playhead = playhead + pitch_ratio
             end
+        end
+
+        function inst:get_ui_state()
+            local ph_norm = (sample_total > 0) and (playhead / sample_total) or nil
+            if not active then ph_norm = nil end
+            return {
+                waveform      = waveform_cache,
+                playhead_norm = ph_norm,
+            }
         end
 
         function inst:reset()

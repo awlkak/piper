@@ -1,0 +1,10 @@
+return {
+  plugin = "plugins/effects/transient_shaper.lua",
+  name   = "Soft Attack",
+  author = "Piper",
+  params = {
+    attack  = -6,
+    sustain = 3,
+    speed   = 0.4,
+  },
+}

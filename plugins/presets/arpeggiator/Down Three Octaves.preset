@@ -1,0 +1,11 @@
+return {
+  plugin = "plugins/control/arpeggiator.lua",
+  name   = "Down Three Octaves",
+  author = "Piper",
+  params = {
+    mode     = 1,
+    octaves  = 3,
+    gate_len = 0.6,
+    latch    = 0,
+  },
+}

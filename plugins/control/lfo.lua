@@ -24,6 +24,52 @@ return {
         { id="offset",label="Offset",     min=-1,   max=1,   default=0,    type="float" },
     },
 
+    gui = {
+        height = 50,
+        draw = function(ctx, state)
+            local shape  = math.floor(state.shape  or 0)
+            local depth  = state.depth  or 1.0
+            local offset = state.offset or 0.0
+            local phase  = state.phase  or 0.0
+            local T      = ctx.theme
+
+            ctx.rect(0, 0, ctx.w, ctx.h, {0.07,0.07,0.10,1}, nil)
+
+            local pad = 4
+            local mid = ctx.h * 0.5
+            local amp = (ctx.h * 0.5 - pad) * depth
+
+            -- Draw one full cycle as a polyline
+            local N   = math.max(2, math.floor(ctx.w))
+            local pts = {}
+            for i = 0, N do
+                local t = i / N  -- 0..1 within one cycle
+                local v
+                if shape == 0 then
+                    v = math.sin(t * 2 * math.pi)
+                elseif shape == 1 then
+                    v = t < 0.5 and (t * 4 - 1) or (3 - t * 4)
+                elseif shape == 2 then
+                    v = t < 0.5 and 1.0 or -1.0
+                else
+                    v = t * 2 - 1
+                end
+                v = v * depth + offset
+                pts[#pts+1] = t * ctx.w
+                pts[#pts+1] = mid - v * (ctx.h * 0.5 - pad)
+            end
+
+            -- Zero line
+            ctx.line(0, mid, ctx.w, mid, {0.18,0.18,0.22,1}, 1)
+
+            ctx.plot(pts, T.accent2, 1.5)
+
+            -- Playhead: vertical line at current phase
+            local phx = phase * ctx.w
+            ctx.line(phx, pad, phx, ctx.h - pad, {0.90,0.65,0.10,0.9}, 1.5)
+        end,
+    },
+
     new = function(self, args)
         local inst   = {}
         local sr     = piper.SAMPLE_RATE
@@ -95,6 +141,15 @@ return {
         end
 
         function inst:destroy() end
+
+        function inst:get_ui_state()
+            return {
+                shape  = shape,
+                depth  = depth,
+                offset = offset,
+                phase  = phase,
+            }
+        end
 
         return inst
     end,
