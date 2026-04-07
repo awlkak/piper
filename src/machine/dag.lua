@@ -3,7 +3,8 @@
 -- Performs topological sort (Kahn's algorithm) to determine render order.
 -- Dispatches render_block() calls in dependency order each audio block.
 
-local DSP = require("src.audio.dsp")
+local DSP       = require("src.audio.dsp")
+local MasterDef = require("src.machine.master_def")
 
 local DAG = {}
 
@@ -33,7 +34,7 @@ function DAG.init(bs)
     -- Always create master output node
     nodes[MASTER_ID] = {
         id        = MASTER_ID,
-        def       = nil,
+        def       = MasterDef,
         instance  = nil,
         params    = {},
         x = 0, y = 0,
@@ -42,6 +43,60 @@ function DAG.init(bs)
         in_bufs   = { ["in"] = DSP.buf_new(block_size) },
         in_kinds  = { ["in"] = "signal" },
     }
+
+    -- Master metering instance: tracks scope samples and peak/hold for the GUI
+    local HOLD_TIME    = 1.5   -- seconds before peak-hold tick starts falling
+    local dt_per_block = block_size / 44100.0
+
+    local inst = {
+        _scope        = {},
+        _scope_n      = block_size,
+        peak_l        = 0, peak_r        = 0,
+        hold_l        = 0, hold_r        = 0,
+        hold_timer_l  = 0, hold_timer_r  = 0,
+    }
+    for i = 1, block_size do inst._scope[i] = 0 end
+
+    function inst:_update(buf, n)
+        local pl, pr = 0, 0
+        for i = 0, n - 1 do
+            local l = buf[i * 2 + 1] or 0
+            local r = buf[i * 2 + 2] or 0
+            self._scope[i + 1] = (l + r) * 0.5
+            local al, ar = math.abs(l), math.abs(r)
+            if al > pl then pl = al end
+            if ar > pr then pr = ar end
+        end
+        self.peak_l = pl
+        self.peak_r = pr
+        -- Peak-hold with timed decay
+        if pl >= self.hold_l then
+            self.hold_l = pl; self.hold_timer_l = HOLD_TIME
+        else
+            self.hold_timer_l = self.hold_timer_l - dt_per_block
+            if self.hold_timer_l <= 0 then self.hold_l = pl end
+        end
+        if pr >= self.hold_r then
+            self.hold_r = pr; self.hold_timer_r = HOLD_TIME
+        else
+            self.hold_timer_r = self.hold_timer_r - dt_per_block
+            if self.hold_timer_r <= 0 then self.hold_r = pr end
+        end
+    end
+
+    function inst:get_ui_state()
+        local s = {}
+        for i = 1, self._scope_n do s[i] = self._scope[i] end
+        return {
+            scope_samples = s,
+            peak_l        = self.peak_l,
+            peak_r        = self.peak_r,
+            peak_hold_l   = self.hold_l,
+            peak_hold_r   = self.hold_r,
+        }
+    end
+
+    nodes[MASTER_ID].instance = inst
 end
 
 function DAG.master_id() return MASTER_ID end
@@ -258,8 +313,9 @@ function DAG.render_block(out_buf, n)
         if not node then goto continue end
 
         if id == MASTER_ID then
-            -- Copy accumulated mix to output
+            -- Copy accumulated mix to output and update metering
             DSP.buf_copy(out_buf, master.in_bufs["in"], n)
+            if master.instance then master.instance:_update(master.in_bufs["in"], n) end
         elseif node.instance then
             local inst = node.instance
             local def_type = node.def and node.def.type
