@@ -38,6 +38,10 @@ local fx_state   = {}   -- ch -> active effect state
 -- Playback mode flags
 local loop_pattern = false  -- when true, repeat current order slot indefinitely
 
+-- Export mode: play through once then stop instead of looping
+local export_mode = false
+local export_done = false
+
 function Sequencer.set_song(s)
     song = s
     Sequencer.recompute_timing()
@@ -113,6 +117,40 @@ end
 
 function Sequencer.get_loop_pattern()
     return loop_pattern
+end
+
+function Sequencer.set_export_mode(enabled)
+    export_mode = enabled
+    export_done = false
+end
+
+function Sequencer.is_export_done()
+    return export_done
+end
+
+-- Save/restore sequencer state (used by exporter to resume normal playback after export)
+function Sequencer.save_state()
+    return {
+        order_pos    = order_pos,
+        row          = row,
+        tick         = tick,
+        sample_accum = sample_accum,
+        playing      = playing,
+        loop_pattern = loop_pattern,
+    }
+end
+
+function Sequencer.restore_state(s)
+    order_pos    = s.order_pos
+    row          = s.row
+    tick         = s.tick
+    sample_accum = s.sample_accum
+    playing      = s.playing
+    loop_pattern = s.loop_pattern
+    export_mode  = false
+    export_done  = false
+    ch_state     = {}
+    fx_state     = {}
 end
 
 function Sequencer.is_playing() return playing end
@@ -249,7 +287,12 @@ function Sequencer._advance_order()
     order_pos = order_pos + 1
     local loop_end = song:effective_loop_end()
     if order_pos > loop_end then
-        order_pos = (song.loop_start or 0) + 1
+        if export_mode then
+            export_done = true
+            playing = false
+        else
+            order_pos = (song.loop_start or 0) + 1
+        end
     end
     row = 0
 end

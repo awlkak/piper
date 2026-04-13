@@ -53,9 +53,10 @@ local on_open         = nil
 local on_restart      = nil
 local on_loop_toggle  = nil
 local on_seek         = nil
+local on_export       = nil
 
 function UI.set_callbacks(play_fn, stop_fn, save_fn, new_fn, open_fn,
-                          restart_fn, loop_fn, seek_fn)
+                          restart_fn, loop_fn, seek_fn, export_fn)
     on_play        = play_fn
     on_stop        = stop_fn
     on_save        = save_fn
@@ -64,6 +65,7 @@ function UI.set_callbacks(play_fn, stop_fn, save_fn, new_fn, open_fn,
     on_restart     = restart_fn
     on_loop_toggle = loop_fn
     on_seek        = seek_fn
+    on_export      = export_fn
 end
 
 -- Project file picker modal state
@@ -77,6 +79,17 @@ local fp = {
     typing    = false,
 }
 local FP_W, FP_H, FP_ROW = 400, 300, 22
+
+-- Export modal state
+local exp = {
+    open     = false,
+    filename = "render.wav",
+    tail     = 2.0,
+    typing   = false,
+    progress = nil,    -- nil = not exporting, 0..1 = progress, "done" = finished
+    error    = nil,    -- error string if export failed
+}
+local EXP_W, EXP_H = 360, 180
 
 local function fp_scan()
     fp.files = {}
@@ -110,6 +123,24 @@ end
 
 local function fp_close()
     fp.open = false
+end
+
+function UI.set_export_progress(frac)
+    exp.progress = frac
+    exp.error    = nil
+end
+
+function UI.set_export_done(ok, err)
+    if ok then
+        exp.progress = "done"
+    else
+        exp.progress = nil
+        exp.error    = tostring(err)
+    end
+end
+
+function UI.is_export_open()
+    return exp.open
 end
 
 function UI.set_graph_callbacks(on_add, on_del, on_add_edge, on_del_edge)
@@ -227,6 +258,9 @@ function UI.draw()
 
     -- File picker modal (drawn on top of everything)
     UI._draw_file_picker()
+
+    -- Export modal (drawn above file picker)
+    UI._draw_export_modal()
 end
 
 function UI._draw_dividers()
@@ -327,9 +361,92 @@ function UI._draw_transport(r)
     x = x + 50
 
     -- File buttons
-    Widgets.button("NEW",  x,      by, 36, bh, false, false, Theme.font_small)
-    Widgets.button("OPEN", x + 40, by, 40, bh, false, false, Theme.font_small)
-    Widgets.button("SAVE", x + 84, by, 40, bh, false, false, Theme.font_small)
+    Widgets.button("NEW",    x,       by, 36, bh, false, false, Theme.font_small)
+    Widgets.button("OPEN",   x + 40,  by, 40, bh, false, false, Theme.font_small)
+    Widgets.button("SAVE",   x + 84,  by, 40, bh, false, false, Theme.font_small)
+    -- Export button (highlighted when export modal is open or exporting)
+    local exp_active = exp.open or (exp.progress ~= nil and exp.progress ~= "done")
+    Widgets.button("EXPORT", x + 128, by, 52, bh, false, exp_active, Theme.font_small)
+end
+
+function UI._draw_export_modal()
+    if not exp.open then return end
+    local sw, sh = love.graphics.getDimensions()
+    -- Dim overlay
+    love.graphics.setColor(0, 0, 0, 0.55)
+    love.graphics.rectangle("fill", 0, 0, sw, sh)
+
+    local rx = math.floor((sw - EXP_W) / 2)
+    local ry = math.floor((sh - EXP_H) / 2)
+
+    -- Panel
+    love.graphics.setColor(Theme.bg_panel[1], Theme.bg_panel[2], Theme.bg_panel[3], 1)
+    love.graphics.rectangle("fill", rx, ry, EXP_W, EXP_H, 4, 4)
+    love.graphics.setColor(Theme.border[1], Theme.border[2], Theme.border[3], 1)
+    love.graphics.rectangle("line", rx, ry, EXP_W, EXP_H, 4, 4)
+
+    -- Title
+    love.graphics.setColor(Theme.text[1], Theme.text[2], Theme.text[3], 1)
+    love.graphics.setFont(Theme.font_medium)
+    love.graphics.print("Export to WAV", rx + 8, ry + 8)
+
+    -- Close button
+    Widgets.button("X", rx + EXP_W - 28, ry + 6, 22, 18, false, false, Theme.font_small)
+
+    local cy = ry + 34
+
+    -- Filename row
+    love.graphics.setColor(Theme.text_dim[1], Theme.text_dim[2], Theme.text_dim[3], 1)
+    love.graphics.setFont(Theme.font_small)
+    love.graphics.print("Filename:", rx + 8, cy + 4)
+    love.graphics.setColor(Theme.bg[1], Theme.bg[2], Theme.bg[3], 1)
+    love.graphics.rectangle("fill", rx + 72, cy, EXP_W - 80, 22, 2, 2)
+    love.graphics.setColor(exp.typing and Theme.accent or Theme.border)
+    love.graphics.rectangle("line", rx + 72, cy, EXP_W - 80, 22, 2, 2)
+    love.graphics.setColor(Theme.text[1], Theme.text[2], Theme.text[3], 1)
+    love.graphics.setFont(Theme.font_mono)
+    love.graphics.print(exp.filename .. (exp.typing and "|" or ""), rx + 76, cy + 3)
+    cy = cy + 28
+
+    -- Tail row
+    love.graphics.setColor(Theme.text_dim[1], Theme.text_dim[2], Theme.text_dim[3], 1)
+    love.graphics.setFont(Theme.font_small)
+    love.graphics.print(string.format("Tail: %.1fs", exp.tail), rx + 8, cy + 4)
+    -- Simple -/+ buttons
+    Widgets.button("-", rx + 72,  cy, 22, 22, false, false, Theme.font_small)
+    Widgets.button("+", rx + 100, cy, 22, 22, false, false, Theme.font_small)
+    cy = cy + 30
+
+    -- Progress / status area
+    if exp.progress == "done" then
+        love.graphics.setColor(0.3, 0.8, 0.4, 1)
+        love.graphics.setFont(Theme.font_small)
+        love.graphics.print("Export complete!", rx + 8, cy + 4)
+    elseif exp.error then
+        love.graphics.setColor(0.9, 0.3, 0.3, 1)
+        love.graphics.setFont(Theme.font_small)
+        love.graphics.print("Error: " .. exp.error, rx + 8, cy + 4)
+    elseif type(exp.progress) == "number" then
+        -- Progress bar
+        love.graphics.setColor(Theme.text_dim[1], Theme.text_dim[2], Theme.text_dim[3], 1)
+        love.graphics.setFont(Theme.font_small)
+        love.graphics.print(string.format("Rendering... %d%%", math.floor(exp.progress * 100)), rx + 8, cy)
+        cy = cy + 16
+        local bw = EXP_W - 16
+        love.graphics.setColor(Theme.bg[1], Theme.bg[2], Theme.bg[3], 1)
+        love.graphics.rectangle("fill", rx + 8, cy, bw, 10, 2, 2)
+        love.graphics.setColor(Theme.accent[1], Theme.accent[2], Theme.accent[3], 1)
+        love.graphics.rectangle("fill", rx + 8, cy, math.floor(bw * exp.progress), 10, 2, 2)
+        cy = cy + 14
+    end
+
+    -- Buttons row
+    local btn_y = ry + EXP_H - 30
+    local can_export = (exp.progress == nil or exp.progress == "done") and type(exp.progress) ~= "number"
+    if can_export then
+        Widgets.button("Export", rx + EXP_W - 124, btn_y, 58, 22, false, false, Theme.font_small)
+    end
+    Widgets.button("Close", rx + EXP_W - 62, btn_y, 54, 22, false, false, Theme.font_small)
 end
 
 function UI._draw_file_picker()
@@ -429,6 +546,76 @@ end
 function UI.handle_events()
     local events = Input.drain()
     for _, ev in ipairs(events) do
+
+        -- Export modal eats all input when open
+        if exp.open then
+            local sw, sh = love.graphics.getDimensions()
+            local rx = math.floor((sw - EXP_W) / 2)
+            local ry = math.floor((sh - EXP_H) / 2)
+
+            if ev.type == "key_down" then
+                local k = ev.key
+                if k == "escape" then
+                    if not (type(exp.progress) == "number") then
+                        exp.open = false
+                    end
+                elseif k == "return" or k == "kpenter" then
+                    if exp.typing then exp.typing = false end
+                elseif k == "backspace" and exp.typing then
+                    exp.filename = exp.filename:sub(1, -2)
+                end
+            elseif ev.type == "text" and exp.typing then
+                exp.filename = exp.filename .. ev.text
+            elseif ev.type == "pointer_down" then
+                local ex, ey = ev.x, ev.y
+                -- Close X
+                if Widgets.hit(ex, ey, rx + EXP_W - 28, ry + 6, 22, 18) then
+                    if not (type(exp.progress) == "number") then
+                        exp.open = false
+                    end
+                    goto next_event
+                end
+                -- Buttons row
+                local btn_y = ry + EXP_H - 30
+                local can_export = (exp.progress == nil or exp.progress == "done")
+                if can_export and Widgets.hit(ex, ey, rx + EXP_W - 124, btn_y, 58, 22) then
+                    -- Export button
+                    local name = exp.filename
+                    if name == "" then name = "render.wav" end
+                    if not name:match("%.wav$") then name = name .. ".wav" end
+                    exp.progress = 0.0
+                    exp.error    = nil
+                    if on_export then on_export(name, { tail_seconds = exp.tail }) end
+                    goto next_event
+                end
+                if Widgets.hit(ex, ey, rx + EXP_W - 62, btn_y, 54, 22) then
+                    -- Close button
+                    if not (type(exp.progress) == "number") then
+                        exp.open = false
+                    end
+                    goto next_event
+                end
+                -- Filename text box
+                local cy = ry + 34
+                if Widgets.hit(ex, ey, rx + 72, cy, EXP_W - 80, 22) then
+                    exp.typing = true
+                    goto next_event
+                else
+                    exp.typing = false
+                end
+                -- Tail -/+ buttons
+                cy = cy + 28
+                if Widgets.hit(ex, ey, rx + 72, cy, 22, 22) then
+                    exp.tail = math.max(0.0, exp.tail - 0.5)
+                    goto next_event
+                end
+                if Widgets.hit(ex, ey, rx + 100, cy, 22, 22) then
+                    exp.tail = math.min(10.0, exp.tail + 0.5)
+                    goto next_event
+                end
+            end
+            goto next_event  -- swallow all events when export modal is open
+        end
 
         -- File picker eats all input when open
         if fp.open then
@@ -624,7 +811,7 @@ function UI.handle_events()
                 x = x + 76 + 10  -- +separator + bpmspd(104) + title(50)
                 x = x + 104 + 50
 
-                -- NEW / OPEN / SAVE
+                -- NEW / OPEN / SAVE / EXPORT
                 if Widgets.hit(ev.x, ev.y, x, by, 36, bh) then
                     transport.jump_open = false
                     if on_new then on_new() end
@@ -636,6 +823,13 @@ function UI.handle_events()
                 elseif Widgets.hit(ev.x, ev.y, x + 84, by, 40, bh) then
                     transport.jump_open = false
                     fp_open("save")
+                    goto next_event
+                elseif Widgets.hit(ev.x, ev.y, x + 128, by, 52, bh) then
+                    transport.jump_open = false
+                    exp.open   = true
+                    exp.typing = false
+                    if exp.progress == "done" then exp.progress = nil end
+                    exp.error  = nil
                     goto next_event
                 end
             end

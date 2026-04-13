@@ -12,6 +12,7 @@ local Song      = require("src.sequencer.song")
 local Pattern   = require("src.sequencer.pattern")
 local Event     = require("src.sequencer.event")
 local ProjLoader = require("src.project.loader")
+local Exporter  = require("src.audio.exporter")
 local UI        = require("src.ui.ui")
 local Input     = require("src.ui.input")
 local Theme     = require("src.ui.theme")
@@ -20,6 +21,7 @@ local App = {}
 
 local song    -- current Song
 local current_project_path = nil
+local export_coro = nil  -- active export coroutine (nil when idle)
 
 -- -------------------------
 -- Initialization
@@ -89,6 +91,10 @@ function App.load()
         -- Seek to order slot
         function(order_pos)
             Sequencer.seek(order_pos, 0)
+        end,
+        -- Export to WAV
+        function(filename, options)
+            App._start_export(filename, options)
         end
     )
     UI.set_graph_callbacks(
@@ -195,6 +201,42 @@ function App._build_default_project()
 end
 
 -- -------------------------
+-- Export
+-- -------------------------
+
+function App._start_export(filename, options)
+    if export_coro then return end  -- already exporting
+
+    -- Pause normal playback during export
+    local was_playing = Sequencer.is_playing()
+    if was_playing then
+        Sequencer.stop()
+        UI.set_playing(false)
+    end
+
+    -- Resolve output path into Love2D save directory
+    local save_dir = love.filesystem.getSaveDirectory()
+    local abs_path = save_dir .. "/" .. filename
+
+    local opts = {
+        path         = abs_path,
+        tail_seconds = (options and options.tail_seconds) or 2.0,
+        bit_depth    = 16,
+        song         = song,
+    }
+
+    export_coro = coroutine.create(Exporter.export)
+    -- Kick off with options
+    local ok, progress = coroutine.resume(export_coro, opts)
+    if not ok then
+        export_coro = nil
+        UI.set_export_done(false, progress)
+    else
+        UI.set_export_progress(type(progress) == "number" and progress or 0)
+    end
+end
+
+-- -------------------------
 -- Project I/O
 -- -------------------------
 
@@ -220,6 +262,24 @@ end
 -- -------------------------
 
 function App.update(dt)
+    if export_coro then
+        -- Drive export coroutine: renders ~0.5s of audio per resume
+        local ok, progress = coroutine.resume(export_coro)
+        if not ok then
+            -- Error during export
+            export_coro = nil
+            UI.set_export_done(false, progress)
+        elseif coroutine.status(export_coro) == "dead" then
+            -- Export finished
+            export_coro = nil
+            UI.set_export_done(true, nil)
+        else
+            UI.set_export_progress(type(progress) == "number" and progress or 0)
+        end
+        -- Don't run Engine.update() while exporting (avoids audio glitches)
+        return
+    end
+
     Engine.update()
     -- Sync playhead to UI
     local pos = Sequencer.position()

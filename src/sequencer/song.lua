@@ -100,6 +100,23 @@ function Song:effective_loop_end()
     return self.loop_end or #self.order
 end
 
+-- Estimate total sample count (approximate — ignores mid-song SET_TEMPO/SET_SPEED FX)
+-- Used by the exporter for progress bar denominator.
+function Song:estimate_frames(sample_rate)
+    local total_rows = 0
+    local end_pos = self:effective_loop_end()
+    for i = 1, end_pos do
+        local entry = self.order[i]
+        if entry then
+            local pat = self.patterns[entry.pattern_id]
+            if pat then total_rows = total_rows + pat.rows end
+        end
+    end
+    local samples_per_tick = sample_rate * 2.5 / self.bpm
+    local samples_per_row  = samples_per_tick * self.speed
+    return math.floor(total_rows * samples_per_row)
+end
+
 -- Serialize to plain table
 function Song:serialize()
     local pats = {}

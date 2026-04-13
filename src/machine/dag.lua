@@ -364,6 +364,15 @@ function DAG.render_block(out_buf, n)
     end
 end
 
+-- Reset all machine instances to their idle state (called before offline export)
+function DAG.reset_all_instances()
+    for id, node in pairs(nodes) do
+        if id ~= MASTER_ID and node.instance and node.instance.reset then
+            node.instance:reset()
+        end
+    end
+end
+
 -- Serialize graph to a plain table (for project save)
 function DAG.serialize()
     local out = { nodes = {}, edges = {} }
